@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace webuntis2BlaueBriefe
 {
@@ -25,7 +22,7 @@ namespace webuntis2BlaueBriefe
                     (DateTime.Now.Month >= 8 ? DateTime.Now.Year + 1 - 2000 : DateTime.Now.Year - 2000).ToString()
                 };
 
-                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2020 | Version 20200129");
+                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2020 | Version 202000301");
                 Console.WriteLine("====================================================================================================");
 
                 int sj = (DateTime.Now.Month >= 8 ? DateTime.Now.Year : DateTime.Now.Year - 1);
@@ -66,7 +63,7 @@ namespace webuntis2BlaueBriefe
             Console.WriteLine("Exportieren Sie die Datei aus dem Digitalen Klassenbuch, indem Sie");
             Console.WriteLine(" 1. Klassenbuch > Berichte klicken");
             Console.WriteLine(" 2. Alle Klassen auswählen");
-            Console.WriteLine(" 3. Unter \"Noten\" die Prüfungsart (z.B. Halbjahreszeugnis) auswählen");
+            Console.WriteLine(" 3. Unter \"Noten\" die Prüfungsart (\"Blauer Brief\") auswählen");
             Console.WriteLine(" 4. Hinter \"Noten pro Schüler\" auf CSV klicken.");
             Console.WriteLine(" 5. Die Datei \"MarksPerLesson.csv\" auf dem Desktop speichern.");
             Console.WriteLine("ENTER beendet das Programm.");

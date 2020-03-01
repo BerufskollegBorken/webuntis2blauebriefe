@@ -6,7 +6,6 @@ using System.Data;
 using System.Data.Odbc;
 using System.IO;
 using System.Linq;
-using Microsoft.Office.Interop.Excel;
 
 namespace webuntis2BlaueBriefe
 {
@@ -155,21 +154,13 @@ WHERE vorgang_schuljahr = '" + aktSj + @"' AND schue_sj.pu_id = " + person.Schl�
                     }
                 }
             }
-            // Für jeden Schüler ...
             
             try
             {
                 foreach (var schueler in (from s in schuelers select s.IdAtlantis).Distinct())
-                {
-                    // ... für jeden Erziehungsberechtigten dieses Schülers ...
-
-                    int zeile = 1;
-
-
-
+                {                    
                     using (StreamWriter outputFile = new StreamWriter(@"C:\Users\bm\Berufskolleg Borken\Terminplanung - Documents\Blaue Briefe\Steuerdatei.csv"))
                     {
-
                         outputFile.WriteLine("Anrede,Klasse,Nachname,Vorname,ENachname,EVorname,Strasse,Plz,Ort,SorgeberechtigtJn,Jahrgang,Fach1,Fach2,Fach3,Fach4");
 
                         foreach (var erziehungsberechtigter in (from e in schuelers where e.IdAtlantis == schueler where e.Typ != "0" select e).ToList())
