@@ -14,8 +14,7 @@ namespace webuntis2BlaueBriefe
             try
             {
                 string inputNotenCsv = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\MarksPerLesson.csv";
-                string inputAbwesenheitenCsv = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\AbsenceTimesTotal.csv";
-
+               
                 List<string> aktSj = new List<string>
                 {
                     (DateTime.Now.Month >= 8 ? DateTime.Now.Year : DateTime.Now.Year - 1).ToString(),
@@ -24,6 +23,7 @@ namespace webuntis2BlaueBriefe
 
                 Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2020 | Version 202000301");
                 Console.WriteLine("====================================================================================================");
+                Console.WriteLine("");
 
                 int sj = (DateTime.Now.Month >= 8 ? DateTime.Now.Year : DateTime.Now.Year - 1);
                 string aktSjUntis = sj.ToString() + (sj + 1);
@@ -45,8 +45,7 @@ namespace webuntis2BlaueBriefe
                 Console.WriteLine("");                
                 Leistungen alleWebuntisLeistungen = new Leistungen(inputNotenCsv, fachs);
                 
-                alleWebuntisLeistungen.GetSchuelerMitBlauemBrief(ConnectionStringAtlantis, aktSj[0] + "/" + aktSj[1]);
-                
+                alleWebuntisLeistungen.GetSchuelerMitBlauemBrief(ConnectionStringAtlantis, aktSj[0] + "/" + aktSj[1]);                
             }
             catch (Exception ex)
             {
@@ -72,4 +71,3 @@ namespace webuntis2BlaueBriefe
         }
     }
 }
-
