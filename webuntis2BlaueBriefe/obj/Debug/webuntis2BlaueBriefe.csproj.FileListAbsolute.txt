@@ -1,0 +1,6 @@
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Debug\webuntis2BlaueBriefe.csprojResolveAssemblyReference.cache
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\webuntis2BlaueBriefe.exe.config
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\webuntis2BlaueBriefe.exe
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\webuntis2BlaueBriefe.pdb
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Debug\webuntis2BlaueBriefe.exe
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Debug\webuntis2BlaueBriefe.pdb
