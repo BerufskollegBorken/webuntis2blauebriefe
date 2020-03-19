@@ -54,8 +54,8 @@ namespace webuntis2BlaueBriefe
 
                 var origFileName = "Blaue Briefe.docx";
 
-                var fileName = @"c:\\users\\bm\\Desktop\\" + DateTime.Now.ToString("yyyyMMdd") + "-" + Nachname + "-" + Vorname + "-Mitteilung-Leistungsstand" + ".docx";
-
+                var fileName = @"c:\\users\\bm\\Desktop\\" + DateTime.Now.ToString("yyyyMMdd") + "-" + Nachname + "-" + Vorname + (art == "G" ? "-Gefährdung-Der-Versetzung.docx" : "-Mitteilung-Leistungsstand.docx");
+                
                 System.IO.File.Copy(origFileName.ToString(), fileName.ToString());
 
                 Application wordApp = new Application { Visible = true };
@@ -276,7 +276,7 @@ Leistung";
 
             var defizitäreFächerDiesesSchülers = (from d in defizitäreLeistungen
                                                   where d.SchlüsselExtern == IdAtlantis
-                                                  where d.Prüfungsart.Contains("laue")
+                                                  where Global.BlaueBriefe.Contains(d.Prüfungsart)
                                                   select d.Fach.KürzelUntis).Distinct().ToList();
 
             var noteJetzt = "";

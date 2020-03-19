@@ -127,14 +127,14 @@ WHERE vorgang_schuljahr = '" + aktSj + @"' AND schue_sj.pu_id = " + idAtlantis +
         {
             foreach (var schueler in this)
             {
-                Console.Write((schueler.Nachname + " " + schueler.Vorname + " (" + schueler.Klasse + "):").PadRight(35));
+                Console.Write(schueler.Klasse.PadRight(7) + ( schueler.Nachname + " " + schueler.Vorname + ":").PadRight(25));
 
                 if ((from f in schueler.Fachs
                      where !Global.Mangelhaft.Contains(f.NoteHalbjahr)
                      where !Global.Ungenügend.Contains(f.NoteHalbjahr)
                      select f).Any())
                 {
-                     Console.Write(("HZ: Kein Defizit. ").PadRight(25));
+                     Console.Write(("HZ: Kein Defizit. ").PadRight(17));
                     
                     if ((from f in schueler.Fachs
                          where Global.Mangelhaft.Contains(f.NoteJetzt)
@@ -172,7 +172,7 @@ WHERE vorgang_schuljahr = '" + aktSj + @"' AND schue_sj.pu_id = " + idAtlantis +
                      where Global.Mangelhaft.Contains(f.NoteHalbjahr)                     
                      select f).Count() == 1)
                 {
-                    Console.Write(("HZ: Eine 5. ").PadRight(25));
+                    Console.Write(("HZ: Eine 5. ").PadRight(17));
                     
                     if ((from f in schueler.Fachs
                          where Global.Mangelhaft.Contains(f.NoteJetzt)
@@ -199,7 +199,7 @@ WHERE vorgang_schuljahr = '" + aktSj + @"' AND schue_sj.pu_id = " + idAtlantis +
                 if ((from f in schueler.Fachs where Global.Ungenügend.Contains(f.NoteHalbjahr) select f).Count() >= 1 || 
                     (from f in schueler.Fachs where Global.Mangelhaft.Contains(f.NoteHalbjahr) select f).Count() > 1)
                 {
-                    Console.Write(("HZ: Zwei oder mehr 5er oder eine 6. ").PadRight(25));
+                    Console.Write(("HZ: Zwei oder mehr 5er oder eine 6. ").PadRight(17));
                     
                     if ((from f in schueler.Fachs
                          where Global.Ungenügend.Contains(f.NoteJetzt)
@@ -224,7 +224,7 @@ WHERE vorgang_schuljahr = '" + aktSj + @"' AND schue_sj.pu_id = " + idAtlantis +
             Schuelers schuelersMitDefiziten = new Schuelers();
 
             foreach (var schueler in this)
-            {
+            {                
                 schueler.GetDefizitfächer(defizitäreLeistungen, fachs);
                                 
                 if (schueler.Fachs.Count > 0)

@@ -23,7 +23,7 @@ namespace webuntis2BlaueBriefe
         {
             if ((from s in stundentafels
                  from f in s.Fachs
-                 where f.KürzelUntis == Fach.KürzelUntis
+                 where f.KürzelUntis == Fach.KürzelUntis || (Klasse.StartsWith("HH") && Fach.KürzelUntis == "BI")
                  where Klasse.StartsWith(s.Name)
                  select f).Any())
             {

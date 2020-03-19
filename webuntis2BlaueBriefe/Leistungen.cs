@@ -17,7 +17,7 @@ namespace webuntis2BlaueBriefe
             {
                 string überschrift = reader.ReadLine();
 
-                Console.Write("Leistungsdaten aus Webuntis ".PadRight(70, '.'));
+                Console.WriteLine("Leistungsdaten aus Webuntis ".PadRight(70, '.'));
 
                 while (true)
                 {
@@ -29,7 +29,6 @@ namespace webuntis2BlaueBriefe
                         {
                             Leistung leistung = new Leistung();
                             var x = line.Split('\t');
-
                             leistung.Datum = DateTime.ParseExact(x[0], "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture);
                             leistung.Name = x[1];
                             leistung.Klasse = x[2];
@@ -39,23 +38,21 @@ namespace webuntis2BlaueBriefe
                             leistung.Bemerkung = x[6];
                             leistung.Benutzer = x[7];
                             leistung.SchlüsselExtern = Convert.ToInt32(x[8]);
-                                                        
-                            // Nur Halbjahresnoten und Blaue Briefe sind relevant. Differenzierungsbereich zählt nicht.
 
-                            if (leistung.IstKeinDiff(stundentafels))
+                            // Nur Halbjahresnoten und Blaue Briefe sind relevant. Differenzierungsbereich zählt nicht.
+                            if (Global.Mangelhaft.Contains(leistung.Note) || Global.Ungenügend.Contains(leistung.Note))
                             {
                                 if (leistung.Prüfungsart == Global.BlaueBriefe)
                                 {
-                                    if (Global.Mangelhaft.Contains(leistung.Note) || Global.Ungenügend.Contains(leistung.Note))
+                                    if (leistung.IstKeinDiff(stundentafels))
                                     {
                                         this.Add(leistung);
-                                    }                               
-                                }
-
-                                if (leistung.Prüfungsart == Global.Halbjahreszeugnis)
-                                {
-                                    this.Add(leistung);
-                                }
+                                    }                                   
+                                }                               
+                            }
+                            if (leistung.Prüfungsart == Global.Halbjahreszeugnis)
+                            {
+                                this.Add(leistung);
                             }
                         }
                     }

@@ -58,7 +58,8 @@ namespace webuntis2BlaueBriefe
 
                 Schuelers schuelerMitDefiziten = schuelersMitStammdaten.FilterDefizitschüler(defizitäreLeistungen, fachs);
 
-                schuelerMitDefiziten.RenderBriefe();                
+                schuelerMitDefiziten.RenderBriefe();
+                Console.ReadKey();
             }
             catch(IOException ex)
             {
