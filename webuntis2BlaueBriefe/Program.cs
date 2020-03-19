@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace webuntis2BlaueBriefe
 {
@@ -8,9 +9,14 @@ namespace webuntis2BlaueBriefe
     {
         public const string ConnectionStringAtlantis = @"Dsn=Atlantis9;uid=DBA";
         public const string ConnectionStringUntis = @"Provider = Microsoft.Jet.OLEDB.4.0; Data Source=M:\\Data\\gpUntis.mdb;";
-
+        
         static void Main(string[] args)
         {
+            Global.Mangelhaft = new List<string>() { "2.0", "1.0" };
+            Global.Ungenügend = new List<string>() { "0.0" };
+            Global.Halbjahreszeugnis = "Halbjahreszeugnis";
+            Global.BlaueBriefe = "Mahnung gem. §50 (4) SchulG (Blauer Brief)";
+
             try
             {
                 string inputNotenCsv = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\MarksPerLesson.csv";
@@ -29,6 +35,10 @@ namespace webuntis2BlaueBriefe
                 string aktSjUntis = sj.ToString() + (sj + 1);
 
                 Fachs fachs = new Fachs(aktSjUntis, ConnectionStringUntis);
+                Stundentafels stundentafels = new Stundentafels(aktSjUntis, ConnectionStringUntis, fachs);
+                Periodes periodes = new Periodes(aktSjUntis, ConnectionStringUntis);
+                Lehrers lehrers = new Lehrers(aktSjUntis, ConnectionStringUntis, periodes);
+                Klasses klasses = new Klasses(aktSjUntis, lehrers, ConnectionStringUntis, periodes);
 
                 if (!File.Exists(inputNotenCsv))
                 {
@@ -42,10 +52,24 @@ namespace webuntis2BlaueBriefe
                     }
                 }
                                 
-                Console.WriteLine("");                
-                Leistungen alleWebuntisLeistungen = new Leistungen(inputNotenCsv, fachs);
-                
-                alleWebuntisLeistungen.GetSchuelerMitBlauemBrief(ConnectionStringAtlantis, aktSj[0] + "/" + aktSj[1]);                
+                DefizitäreLeistungen defizitäreLeistungen = new DefizitäreLeistungen(inputNotenCsv, fachs, stundentafels);
+
+                Schuelers schuelersMitStammdaten = new Schuelers(aktSj[0] + "/" + aktSj[1], ConnectionStringAtlantis, defizitäreLeistungen, klasses, lehrers);
+
+                Schuelers schuelerMitDefiziten = schuelersMitStammdaten.FilterDefizitschüler(defizitäreLeistungen, fachs);
+
+                schuelerMitDefiziten.RenderBriefe();                
+            }
+            catch(IOException ex)
+            {
+                Console.WriteLine("");
+                Console.WriteLine("");
+                if (ex.ToString().Contains("bereits vorhanden"))
+                {
+                    Console.WriteLine("FEHLER: Die Datei existiert bereits. Bitte zuerst löschen. Dann erneut starten.");                    
+                }                
+                Console.ReadKey();
+                Environment.Exit(0);
             }
             catch (Exception ex)
             {
@@ -56,13 +80,14 @@ namespace webuntis2BlaueBriefe
                 Environment.Exit(0);
             }
         }
+
         private static void RenderNotenexportCsv(string inputNotenCsv)
         {
             Console.WriteLine("Die Datei " + inputNotenCsv + " existiert nicht.");
             Console.WriteLine("Exportieren Sie die Datei aus dem Digitalen Klassenbuch, indem Sie");
             Console.WriteLine(" 1. Klassenbuch > Berichte klicken");
             Console.WriteLine(" 2. Alle Klassen auswählen");
-            Console.WriteLine(" 3. Unter \"Noten\" die Prüfungsart (\"Blauer Brief\") auswählen");
+            Console.WriteLine(" 3. Unter \"Noten\" die Prüfungsart alle Prüfungsarten auswählen");
             Console.WriteLine(" 4. Hinter \"Noten pro Schüler\" auf CSV klicken.");
             Console.WriteLine(" 5. Die Datei \"MarksPerLesson.csv\" auf dem Desktop speichern.");
             Console.WriteLine("ENTER beendet das Programm.");

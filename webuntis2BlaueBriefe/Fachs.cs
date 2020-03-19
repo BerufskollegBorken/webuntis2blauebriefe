@@ -6,6 +6,13 @@ namespace webuntis2BlaueBriefe
 {
     public class Fachs:List<Fach>
     {
+        private Leistung noteHalbjahr;
+        private Leistung noteJetzt;
+
+        public Fachs()
+        {
+        }
+
         public Fachs(string aktSj, string connectionStringUntis)
         {
             using (OleDbConnection oleDbConnection = new OleDbConnection(connectionStringUntis))
@@ -29,9 +36,9 @@ namespace webuntis2BlaueBriefe
                         Fach fach = new Fach()
                         {
                             IdUntis = oleDbDataReader.GetInt32(0),
-                            KürzelUntis = SafeGetString(oleDbDataReader, 1),
-                            LangnameUntis = SafeGetString(oleDbDataReader, 2),
-                            BezeichnungImZeugnis = SafeGetString(oleDbDataReader, 3)                            
+                            KürzelUntis = SafeGetString(oleDbDataReader, 1).ToString(),
+                            LangnameUntis = SafeGetString(oleDbDataReader, 2).ToString(),
+                            BezeichnungImZeugnis = SafeGetString(oleDbDataReader, 3).ToString()                            
                         };
                         this.Add(fach);
                     };
@@ -49,7 +56,7 @@ namespace webuntis2BlaueBriefe
                 }
             }
         }
-
+                
         private object SafeGetString(OleDbDataReader reader, int colIndex)
         {
             if (!reader.IsDBNull(colIndex))
