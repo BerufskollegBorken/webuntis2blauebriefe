@@ -11,14 +11,12 @@ namespace webuntis2BlaueBriefe
 {
     public class DefizitäreLeistungen : List<Leistung>
     {
-        public DefizitäreLeistungen(string datei, Fachs fachs, Stundentafels stundentafels)
+        public DefizitäreLeistungen(Fachs fachs, Stundentafels stundentafels)
         {
-            using (StreamReader reader = new StreamReader(datei))
+            using (StreamReader reader = new StreamReader(Global.InputNotenCsv))
             {
                 string überschrift = reader.ReadLine();
-
-                Console.WriteLine("Leistungsdaten aus Webuntis ".PadRight(70, '.'));
-
+                
                 while (true)
                 {
                     string line = reader.ReadLine();
@@ -47,7 +45,12 @@ namespace webuntis2BlaueBriefe
                                     if (leistung.IstKeinDiff(stundentafels))
                                     {
                                         this.Add(leistung);
-                                    }                                   
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("ACHTUNG: Mahnung im Diff-Bereich." + leistung.Klasse + " " + leistung.Fach);
+                                        Console.ReadKey();
+                                    }                               
                                 }                               
                             }
                             if (leistung.Prüfungsart == Global.Halbjahreszeugnis)
@@ -66,7 +69,7 @@ namespace webuntis2BlaueBriefe
                         break;
                     }
                 }
-                Console.WriteLine((" " + this.Count.ToString()).PadLeft(30, '.'));
+                Console.WriteLine(("Leistungsdaten " + ".".PadRight(this.Count / 150, '.')).PadRight(48, '.') + (" " + this.Count).ToString().PadLeft(4), '.');
             }
         }
         
@@ -91,14 +94,6 @@ namespace webuntis2BlaueBriefe
             catch (Exception)
             {
                 System.Diagnostics.Process.Start("Notepad.exe", pfad);
-            }
-        }
-
-        internal void Get(Schueler schueler)
-        {
-            foreach (var defi in this)
-            {
-
             }
         }
     }
