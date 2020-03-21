@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Exchange.WebServices.Data;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Odbc;
@@ -12,11 +13,11 @@ namespace webuntis2BlaueBriefe
         {
         }
 
-        public Schuelers(string aktSj, string connectionStringAtlantis, DefizitäreLeistungen defizitäreLeistungen, Klasses klasses, Lehrers lehrers)
+        public Schuelers(DefizitäreLeistungen defizitäreLeistungen, Klasses klasses, Lehrers lehrers, Fachs fachs)
         {
             foreach (var idAtlantis in (from t in defizitäreLeistungen select t.SchlüsselExtern).Distinct().ToList())
             {
-                using (OdbcConnection connection = new OdbcConnection(connectionStringAtlantis))
+                using (OdbcConnection connection = new OdbcConnection(Global.ConnectionStringAtlantis))
                 {
                     connection.Open();
 
@@ -54,7 +55,7 @@ DBA.adresse.brief_adresse,
 DBA.schue_sj.kl_id, 
 DBA.adresse.s_famstand_adr
 FROM((DBA.schue_sj JOIN DBA.klasse ON DBA.schue_sj.kl_id = DBA.klasse.kl_id) JOIN DBA.schueler ON DBA.schue_sj.pu_id = DBA.schueler.pu_id) JOIN DBA.adresse ON DBA.schueler.pu_id = DBA.adresse.pu_id
-WHERE vorgang_schuljahr = '" + aktSj + @"' AND schue_sj.pu_id = " + idAtlantis + ";";
+WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = " + idAtlantis + ";";
 
                         OdbcDataReader reader = command.ExecuteReader();
 
@@ -112,110 +113,76 @@ WHERE vorgang_schuljahr = '" + aktSj + @"' AND schue_sj.pu_id = " + idAtlantis +
                             }
                         }
 
-                        defizitäreLeistungen.Get(schueler);
+                        schueler.GetDefizitfächer(defizitäreLeistungen, fachs);
 
-                        this.Add(schueler);
-
+                        if (schueler.Fachs.Count > 0)
+                        {
+                            this.Add(schueler);
+                        }
                         reader.Close();
-                        command.Dispose();
+                        command.Dispose();                        
                     }
                 }
+                
             }
+            Console.WriteLine(("Schüler mit Defiziten " + ".".PadRight(this.Count / 150, '.')).PadRight(48, '.') + (" " + this.Count).ToString().PadLeft(4), '.');
+        }
+
+        internal void MailAnKlassenlehrer()
+        {
+            foreach (var klasse in (from s in this select s.Klasse).Distinct())
+            {
+                var schülerDieserKlasse = (from s in this
+                                           where s.Klasse == klasse
+                                           select s).OrderBy(x => x.Nachname).ThenBy(x => x.Vorname).ToList();
+
+                Mail(schülerDieserKlasse);
+            }
+        }
+
+        private void Mail(List<Schueler> schülerDieserKlasse)
+        {
+            ExchangeService exchangeService = new ExchangeService();
+
+            exchangeService.UseDefaultCredentials = true;
+            exchangeService.TraceEnabled = false;
+            exchangeService.TraceFlags = TraceFlags.All;
+            exchangeService.Url = new Uri("https://ex01.bkb.local/EWS/Exchange.asmx");
+
+            EmailMessage message = new EmailMessage(exchangeService);
+
+            message.ToRecipients.Add("stefan.baeumer@berufskolleg-borken.de");
+
+            message.Subject = "Blaue Briefe - BITTE KONTROLLIEREN";
+
+            message.Body = @"Hallo " + schülerDieserKlasse[0].Klassenleitung + "" +
+                "<br><br>Sie erhalten diese Mail in Ihrer Eigenschaft als Klassenleitung der Klasse " + schülerDieserKlasse[0].Klasse + "." +
+                "<br><br>" +
+                "Bitte prüfen Sie die im Folgenden automatisch erstellten und aufgelisteten Blauen Briefe gewissenhaft. Die Verantwortung für die Richtigkeit liegt ganz allein bei Ihnen." +
+                "<br><table border = 1><th><td>Name</td><td>Vollj.</td><td>Halbjahreszeugnis</td><td>Aktueller Notenstand aller abweichenden Fächer</td><td>Gefährdung / Mitteilung Leistungsstand</td></th>";
+
+            foreach (var s in schülerDieserKlasse)
+            {
+                message.Body += "<tr>" + s.Protokoll + "</tr>";
+            }
+
+            message.Body += "</table></br>" +
+                "Wer sich nicht meldet, bestätigt damit die Richtigkeit. Die Briefe werden dann zeitnah verschickt." +
+                "</br></br>" +
+                "Stefan Bäumer" +
+                "";
+
+            message.Save(WellKnownFolderName.Drafts);
+            //message.SendAndSaveCopy();
+            
+            Console.WriteLine(schülerDieserKlasse[0].Klasse + " " + schülerDieserKlasse[0].Klassenleitung  + ": Mail gesendet.");
         }
 
         internal void RenderBriefe()
         {
             foreach (var schueler in this)
             {
-                Console.Write(schueler.Klasse.PadRight(7) + ( schueler.Nachname + " " + schueler.Vorname + ":").PadRight(25));
-
-                if ((from f in schueler.Fachs
-                     where !Global.Mangelhaft.Contains(f.NoteHalbjahr)
-                     where !Global.Ungenügend.Contains(f.NoteHalbjahr)
-                     select f).Any())
-                {
-                     Console.Write(("HZ: Kein Defizit. ").PadRight(17));
-                    
-                    if ((from f in schueler.Fachs
-                         where Global.Mangelhaft.Contains(f.NoteJetzt)
-                         select f).Count() == 1)
-                    {
-                        Console.Write("Jetzt eine 5: Mitteilung über Leistungsstand ...");
-                        schueler.RenderMitteilung("M");
-                        Console.WriteLine("... ok.");
-                    }
-
-                    // Jetzt zwei oder mehr 5: Gefährdung
-
-                    if ((from f in schueler.Fachs
-                         where Global.Mangelhaft.Contains(f.NoteJetzt)
-                         select f).Count() > 1)
-                    {
-                        Console.Write("Jetzt mehr als eine 5: Gefährdung ...");
-                        schueler.RenderMitteilung("G");
-                        Console.WriteLine("... ok.");                        
-                    }
-
-                    // Jetzt eine 6 oder mehr: Gefährdung
-
-                    if ((from f in schueler.Fachs
-                         where Global.Ungenügend.Contains(f.NoteJetzt)
-                         select f).Count() > 0)
-                    {
-                        Console.Write("Jetzt 1 oder mehr 6en: Gefährdung ...");
-                        schueler.RenderMitteilung("G");
-                        Console.WriteLine("... ok.");
-                    }
-                }
-                
-                if ((from f in schueler.Fachs
-                     where Global.Mangelhaft.Contains(f.NoteHalbjahr)                     
-                     select f).Count() == 1)
-                {
-                    Console.Write(("HZ: Eine 5. ").PadRight(17));
-                    
-                    if ((from f in schueler.Fachs
-                         where Global.Mangelhaft.Contains(f.NoteJetzt)
-                         select f).Count() > (from f in schueler.Fachs
-                                              where Global.Mangelhaft.Contains(f.NoteHalbjahr)
-                                              select f).Count())
-                    {
-                        Console.WriteLine(" Jetzt eine oder mehrere zusätzliche 5en: Gefährdung ...");
-                        schueler.RenderMitteilung("G");
-                        Console.WriteLine("... ok.");
-                    }
-                    
-                    if ((from f in schueler.Fachs
-                         where Global.Ungenügend.Contains(f.NoteJetzt)
-                         select f).Count() > (from f in schueler.Fachs
-                                              where Global.Ungenügend.Contains(f.NoteHalbjahr) select f).Count())
-                    {
-                        Console.WriteLine(" Jetzt eine oder mehr zusätzliche 6: Gefährdung ...");
-                        schueler.RenderMitteilung("G");
-                        Console.WriteLine("... ok.");
-                    }
-                }
-                
-                if ((from f in schueler.Fachs where Global.Ungenügend.Contains(f.NoteHalbjahr) select f).Count() >= 1 || 
-                    (from f in schueler.Fachs where Global.Mangelhaft.Contains(f.NoteHalbjahr) select f).Count() > 1)
-                {
-                    Console.Write(("HZ: Zwei oder mehr 5er oder eine 6. ").PadRight(17));
-                    
-                    if ((from f in schueler.Fachs
-                         where Global.Ungenügend.Contains(f.NoteJetzt)
-                         where Global.Mangelhaft.Contains(f.NoteJetzt)
-                         select f).Count() > (from f in schueler.Fachs
-                                                where Global.Ungenügend.Contains(f.NoteHalbjahr)
-                                              where Global.Mangelhaft.Contains(f.NoteHalbjahr)
-                                              select f).Count())
-                    {
-                        Console.Write("Jetzt eine oder mehrere zusätzliche 5 oder 6: Gefährdung ...");
-                        schueler.RenderGefährdung();
-                        Console.WriteLine("... ok.");
-                    }
-
-                    //Abschlussklasse erhalten keine Benachrichtigung
-                }
+                schueler.RenderBrief();
             }
         }
 
@@ -230,7 +197,6 @@ WHERE vorgang_schuljahr = '" + aktSj + @"' AND schue_sj.pu_id = " + idAtlantis +
                 if (schueler.Fachs.Count > 0)
                 {
                     schuelersMitDefiziten.Add(schueler);
-
                 }
             }
             return schuelersMitDefiziten;
