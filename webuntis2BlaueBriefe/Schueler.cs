@@ -1,6 +1,7 @@
 ﻿using Microsoft.Office.Interop.Word;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace webuntis2BlaueBriefe
@@ -51,7 +52,7 @@ namespace webuntis2BlaueBriefe
             if (art == "G")
             {
                 Console.Write("Gefährdung ...");
-                Protokoll += "<td>Gefährdung</td>";
+                Protokoll += "<td>Gefährdung " + RenderGefährdungNeu() + " </td>";
             }
             else
             {
@@ -60,7 +61,7 @@ namespace webuntis2BlaueBriefe
             }
 
             // Für jede unterschiedliche Adresse
-
+            
             var x = (from s in this.Sorgeberechtigte select s.Strasse).Distinct().Count();
 
             var sss = (from s in this.Sorgeberechtigte select s.Strasse).Distinct().ToList();
@@ -79,6 +80,11 @@ namespace webuntis2BlaueBriefe
                 var fileName = @"c:\\users\\bm\\Desktop\\" + DateTime.Now.ToString("yyyyMMdd") + "-" + Nachname + "-" + Vorname + (x > 1 ? strasse : "") + (art == "G" ? "-Gefährdung-Der-Versetzung.docx" : "-Mitteilung-Leistungsstand.docx");
 
                 Dateien.Add(fileName);
+
+                if (File.Exists(fileName));
+                {
+                    File.Delete(fileName);
+                }
 
                 System.IO.File.Copy(origFileName.ToString(), fileName.ToString());
 
@@ -139,6 +145,27 @@ namespace webuntis2BlaueBriefe
             }
         }
 
+        private string RenderGefährdungNeu()
+        {
+            string x = "";
+
+            if ((from f in Fachs
+                 where Global.Mangelhaft.Contains(f.NoteHalbjahr)
+                 || Global.Ungenügend.Contains(f.NoteHalbjahr)
+                 select f).Count() == 0)
+            {
+                x = "";
+            }
+
+            x += "";
+
+            foreach (var item in Fachs)
+            {
+                x += "<br>" + item.KürzelUntis + "<br>(" + (from g in Global.Noten where item.NoteHalbjahr == g.Stufe select g.Klartext).FirstOrDefault() + "),";
+            }
+            return x.TrimEnd(',');
+        }
+
         private object GetAbsatz3()
         {
             return "Wir laden Sie zu einem Beratungsgespräch ein. Stimmen Sie bitte den Gesprächstermin mit " + (KlassenleitungMw == "Herr" ? "dem Klassenlehrer " : "der Klassenlehrerin") + " " + Klassenleitung + " (" + KlassenleitungMail + ") ab.";
@@ -178,7 +205,7 @@ namespace webuntis2BlaueBriefe
         internal void RenderBrief()
         {
             Console.Write(Klasse + " " + Nachname + (Volljaehrig ? "(vollj.)" : "") + "; HZ: " + RenderNotenHz() + "; Jetzt: " + RenderNotenJetzt() + "; ");
-
+            
             Protokoll = "<td>" + Nachname + ", " + Vorname + "</td><td>" + (Volljaehrig ? "J" : "N") + "</td><td>" + RenderNotenHz() + "</td><td>" + RenderNotenJetzt() + "</td>";
 
             if ((from f in Fachs
@@ -205,7 +232,7 @@ namespace webuntis2BlaueBriefe
 
                     // HZ kein Defizit; jetzt zwei oder mehr 5: Gefährdung
 
-                    if ((from f in Fachs
+                   if ((from f in Fachs
                          where Global.Mangelhaft.Contains(f.NoteJetzt)
                          select f).Count() > 1)
                     {
@@ -235,11 +262,11 @@ namespace webuntis2BlaueBriefe
                  select f).Count() == 1)
             {                
                 if ((from f in Fachs
-                     where !Global.Ungenügend.Contains(f.NoteHalbjahr)
+                     where Global.Ungenügend.Contains(f.NoteHalbjahr)
                      select f).Count() == 0)
                 {
                     if ((from f in Fachs
-                         where !Global.Ungenügend.Contains(f.NoteHalbjahr)
+                         where Global.Ungenügend.Contains(f.NoteHalbjahr)
                          select f).Count() == 0)
                     {
                         if ((from f in Fachs
@@ -386,42 +413,7 @@ Leistung";
             }
             return x.TrimEnd(',');
         }
-
-        internal void RenderGefährdung()
-        {
-            //System.IO.File.Copy(origFileName.ToString(), fileName.ToString());
-
-            //Application wordApp = new Microsoft.Office.Interop.Word.Application { Visible = true };
-            //Document aDoc = wordApp.Documents.Open(fileName, ReadOnly: false, Visible: true);
-            //aDoc.Activate();
-
-            //FindAndReplace(wordApp, "<vorname>", Vorname);
-            //FindAndReplace(wordApp, "<nachname>", Nachname);
-            //FindAndReplace(wordApp, "<plz>", Adresse.Plz);
-            //FindAndReplace(wordApp, "<straße>", Adresse.Strasse);
-            //FindAndReplace(wordApp, "<ort>", Adresse.Ort);
-            //FindAndReplace(wordApp, "<klasse>", Klasse.NameUntis);
-            //FindAndReplace(wordApp, "<klassenleitung>", Klasse.Klassenleitungen[0].Anrede + " " + Klasse.Klassenleitungen[0].Nachname);
-            //FindAndReplace(wordApp, "<mahnung>", RenderBisherigeMaßnahmen());
-            //FindAndReplace(wordApp, "<heute>", DateTime.Now.ToShortDateString());
-
-            //for (int i = 0; i < AbwesenheitenSeitLetzterMaßnahme.Count; i++)
-            //{
-            //    string fehltage = AbwesenheitenSeitLetzterMaßnahme[i].Datum.ToShortDateString() + " (" + AbwesenheitenSeitLetzterMaßnahme[i].Fehlstunden + "), " + "<fehltage>";
-            //    FindAndReplace(wordApp, "<fehltage>", fehltage.TrimEnd(','));
-            //}
-
-            //FindAndReplace(wordApp, ", <fehltage>", "");
-
-            //aDoc.Save();
-            //aDoc.Close();
-            //System.Runtime.InteropServices.Marshal.ReleaseComObject(aDoc);
-            //aDoc = null;
-            //GC.Collect();
-
-            //return fileName;
-        }
-
+        
         private static void FindAndReplace(Application doc, object findText, object replaceWithText)
         {
             //options

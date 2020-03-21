@@ -71,8 +71,9 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                             schueler.IdAtlantis = Convert.ToInt32(reader.GetValue(0));
                             var sorgeberechtigtJn = reader.GetValue(13).ToString();
                             var anrede = reader.GetValue(14).ToString();
-
-                            if (sorgeberechtigtJn == "N")
+                            var typ = reader.GetValue(2).ToString();
+                            
+                            if (sorgeberechtigtJn == "N" && typ == "0")
                             {
                                 schueler.Vorname = reader.GetValue(5).ToString();
                                 schueler.Nachname = reader.GetValue(4).ToString();
@@ -122,8 +123,7 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                         reader.Close();
                         command.Dispose();                        
                     }
-                }
-                
+                }                
             }
             Console.WriteLine(("Schüler mit Defiziten " + ".".PadRight(this.Count / 150, '.')).PadRight(48, '.') + (" " + this.Count).ToString().PadLeft(4), '.');
         }
@@ -163,7 +163,7 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                  
             message.Subject = "Blaue Briefe - BITTE KONTROLLIEREN";
 
-            message.Body = @"Guten Tag " + schülerDieserKlasse[0].Klassenleitung + "" +
+            message.Body = @"Guten Tag " + schülerDieserKlasse[0].Klassenleitung + "," +
                 "<br><br>Sie erhalten diese Mail in Ihrer Eigenschaft als Klassenleitung der Klasse " + schülerDieserKlasse[0].Klasse + "." +
                 "<br><br>" +
                 "Bitte prüfen Sie die im Folgenden automatisch erstellten und aufgelisteten Blauen Briefe gewissenhaft. Die Verantwortung für die Richtigkeit liegt ganz allein bei Ihnen.</br>" +
