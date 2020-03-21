@@ -6,14 +6,11 @@ namespace webuntis2BlaueBriefe
 {
     public class Fachs:List<Fach>
     {
-        private Leistung noteHalbjahr;
-        private Leistung noteJetzt;
-
         public Fachs()
         {
         }
 
-        public Fachs(string aktSj, string connectionStringUntis)
+        public Fachs(string connectionStringUntis)
         {
             using (OleDbConnection oleDbConnection = new OleDbConnection(connectionStringUntis))
             {
@@ -25,7 +22,7 @@ namespace webuntis2BlaueBriefe
                                             Subjects.Longname,
                                             Subjects.Text
                                             FROM Subjects 
-                                            WHERE Schoolyear_id = " + aktSj + " AND Deleted=No ORDER BY Name;";
+                                            WHERE Schoolyear_id = " + Global.AktSjUntis + " AND Deleted=No ORDER BY Name;";
 
                     OleDbCommand oleDbCommand = new OleDbCommand(queryString, oleDbConnection);
                     oleDbConnection.Open();

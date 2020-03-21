@@ -4,3 +4,9 @@ U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\webuntis2Bla
 U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\webuntis2BlaueBriefe.pdb
 U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Debug\webuntis2BlaueBriefe.exe
 U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Debug\webuntis2BlaueBriefe.pdb
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\Microsoft.Exchange.WebServices.Auth.dll
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\Microsoft.Exchange.WebServices.dll
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\Microsoft.Exchange.WebServices.pdb
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\Microsoft.Exchange.WebServices.xml
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\Microsoft.Exchange.WebServices.Auth.pdb
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\Microsoft.Exchange.WebServices.Auth.xml

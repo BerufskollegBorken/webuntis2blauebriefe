@@ -7,11 +7,11 @@ namespace webuntis2BlaueBriefe
 {
     public class Stundentafels : List<Stundentafel>
     {
-        public Stundentafels(string aktSj, string connectionStringUntis, Fachs fachs)
+        public Stundentafels(Fachs fachs)
         {
             try
             {
-                using (OleDbConnection oleDbConnection = new OleDbConnection(connectionStringUntis))
+                using (OleDbConnection oleDbConnection = new OleDbConnection(Global.ConnectionStringUntis))
                 {
                     string queryString = @"SELECT 
 PeriodsTable.PERIODS_TABLE_ID, 
@@ -19,7 +19,7 @@ PeriodsTable.Name,
 PeriodsTable.Longname, 
 PeriodsTable.PerTabElement1
 FROM PeriodsTable
-WHERE (((PeriodsTable.SCHOOLYEAR_ID)=" + aktSj + ") AND ((PeriodsTable.Deleted)=No)) ORDER BY Name;";
+WHERE (((PeriodsTable.SCHOOLYEAR_ID)=" + Global.AktSjUntis + ") AND ((PeriodsTable.Deleted)=No)) ORDER BY Name;";
 
                     OleDbCommand oleDbCommand = new OleDbCommand(queryString, oleDbConnection);
                     oleDbConnection.Open();

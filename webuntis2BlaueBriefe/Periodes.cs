@@ -6,9 +6,9 @@ namespace webuntis2BlaueBriefe
 {
     public class Periodes : List<Periode>
     {
-        public Periodes(string aktSj, string connectionString)
+        public Periodes()
         {
-            using (OleDbConnection oleDbConnection = new OleDbConnection(connectionString))
+            using (OleDbConnection oleDbConnection = new OleDbConnection(Global.ConnectionStringUntis))
             {
                 try
                 {
@@ -19,7 +19,7 @@ Terms.Longname,
 Terms.DateFrom, 
 Terms.DateTo
 FROM Terms
-WHERE (((Terms.SCHOOLYEAR_ID)= " + aktSj + ")  AND ((Terms.SCHOOL_ID)=177659)) ORDER BY Terms.TERM_ID;";
+WHERE (((Terms.SCHOOLYEAR_ID)= " + Global.AktSjUntis + ")  AND ((Terms.SCHOOL_ID)=177659)) ORDER BY Terms.TERM_ID;";
 
                     OleDbCommand oleDbCommand = new OleDbCommand(queryString, oleDbConnection);
                     oleDbConnection.Open();

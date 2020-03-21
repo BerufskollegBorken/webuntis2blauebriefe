@@ -6,59 +6,31 @@ using System.Linq;
 namespace webuntis2BlaueBriefe
 {
     class Program
-    {
-        public const string ConnectionStringAtlantis = @"Dsn=Atlantis9;uid=DBA";
-        public const string ConnectionStringUntis = @"Provider = Microsoft.Jet.OLEDB.4.0; Data Source=M:\\Data\\gpUntis.mdb;";
-        
+    {        
         static void Main(string[] args)
         {
-            Global.Mangelhaft = new List<string>() { "2.0", "1.0" };
-            Global.Ungenügend = new List<string>() { "0.0" };
-            Global.Halbjahreszeugnis = "Halbjahreszeugnis";
-            Global.BlaueBriefe = "Mahnung gem. §50 (4) SchulG (Blauer Brief)";
+            System.Net.ServicePointManager.ServerCertificateValidationCallback = ((sender, certificate, chain, sslPolicyErrors) => true);
 
             try
-            {
-                string inputNotenCsv = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\MarksPerLesson.csv";
-               
-                List<string> aktSj = new List<string>
-                {
-                    (DateTime.Now.Month >= 8 ? DateTime.Now.Year : DateTime.Now.Year - 1).ToString(),
-                    (DateTime.Now.Month >= 8 ? DateTime.Now.Year + 1 - 2000 : DateTime.Now.Year - 2000).ToString()
-                };
-
-                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2020 | Version 202000301");
+            {                               
+                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2020 | Version 202000322");
                 Console.WriteLine("====================================================================================================");
                 Console.WriteLine("");
 
-                int sj = (DateTime.Now.Month >= 8 ? DateTime.Now.Year : DateTime.Now.Year - 1);
-                string aktSjUntis = sj.ToString() + (sj + 1);
-
-                Fachs fachs = new Fachs(aktSjUntis, ConnectionStringUntis);
-                Stundentafels stundentafels = new Stundentafels(aktSjUntis, ConnectionStringUntis, fachs);
-                Periodes periodes = new Periodes(aktSjUntis, ConnectionStringUntis);
-                Lehrers lehrers = new Lehrers(aktSjUntis, ConnectionStringUntis, periodes);
-                Klasses klasses = new Klasses(aktSjUntis, lehrers, ConnectionStringUntis, periodes);
-
-                if (!File.Exists(inputNotenCsv))
-                {
-                    RenderNotenexportCsv(inputNotenCsv);
-                }
-                else
-                {
-                    if (System.IO.File.GetLastWriteTime(inputNotenCsv).Date != DateTime.Now.Date)
-                    {
-                        RenderNotenexportCsv(inputNotenCsv);
-                    }
-                }
-                                
-                DefizitäreLeistungen defizitäreLeistungen = new DefizitäreLeistungen(inputNotenCsv, fachs, stundentafels);
-
-                Schuelers schuelersMitStammdaten = new Schuelers(aktSj[0] + "/" + aktSj[1], ConnectionStringAtlantis, defizitäreLeistungen, klasses, lehrers);
-
-                Schuelers schuelerMitDefiziten = schuelersMitStammdaten.FilterDefizitschüler(defizitäreLeistungen, fachs);
-
+                CsvDateiExistiert();
+                
+                Fachs fachs = new Fachs(Global.ConnectionStringUntis);
+                Stundentafels stundentafels = new Stundentafels(fachs);
+                Periodes periodes = new Periodes();
+                Lehrers lehrers = new Lehrers(periodes);
+                Klasses klasses = new Klasses(lehrers, periodes);                
+                DefizitäreLeistungen defizitäreLeistungen = new DefizitäreLeistungen(fachs,stundentafels);
+                Schuelers schuelerMitDefiziten = new Schuelers(defizitäreLeistungen, klasses, lehrers, fachs);
+                
                 schuelerMitDefiziten.RenderBriefe();
+
+                schuelerMitDefiziten.MailAnKlassenlehrer();
+                Console.WriteLine("Verarbeitung beendet. ENTER");
                 Console.ReadKey();
             }
             catch(IOException ex)
@@ -79,6 +51,21 @@ namespace webuntis2BlaueBriefe
                 Console.WriteLine(ex);
                 Console.ReadKey();
                 Environment.Exit(0);
+            }
+        }
+
+        private static void CsvDateiExistiert()
+        {
+            if (!File.Exists(Global.InputNotenCsv))
+            {
+                RenderNotenexportCsv(Global.InputNotenCsv);
+            }
+            else
+            {
+                if (System.IO.File.GetLastWriteTime(Global.InputNotenCsv).Date != DateTime.Now.Date)
+                {
+                    RenderNotenexportCsv(Global.InputNotenCsv);
+                }
             }
         }
 

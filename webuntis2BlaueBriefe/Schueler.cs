@@ -44,6 +44,7 @@ namespace webuntis2BlaueBriefe
         public string KlassenleitungMw { get; internal set; }
         public string KlassenleitungMail { get; internal set; }
         public string Protokoll { get; private set; }
+        public List<string> Dateien { get; set; }
 
         internal void RenderMitteilung(string art)
         {
@@ -74,15 +75,19 @@ namespace webuntis2BlaueBriefe
                 var sorgeberechtigter = (from s in this.Sorgeberechtigte where s.Strasse == strasse select s).FirstOrDefault();
 
                 var origFileName = "Blaue Briefe.docx";
-
-                var fileName = @"c:\\users\\bm\\Desktop\\" + DateTime.Now.ToString("yyyyMMdd") + "-" + Nachname + "-" + Vorname + (art == "G" ? "-Gefährdung-Der-Versetzung.docx" : "-Mitteilung-Leistungsstand.docx");
                 
+                var fileName = @"c:\\users\\bm\\Desktop\\" + DateTime.Now.ToString("yyyyMMdd") + "-" + Nachname + "-" + Vorname + (x > 1 ? strasse : "") + (art == "G" ? "-Gefährdung-Der-Versetzung.docx" : "-Mitteilung-Leistungsstand.docx");
+
+                Dateien.Add(fileName);
+
                 System.IO.File.Copy(origFileName.ToString(), fileName.ToString());
 
                 Application wordApp = new Application { Visible = true };
                 Document aDoc = wordApp.Documents.Open(fileName, ReadOnly: false, Visible: true);
                 aDoc.Activate();
-                
+
+                Protokoll += "<td>";
+
                 if (Volljaehrig)
                 {
                     FindAndReplace(wordApp, "<AnDieErziehungsberechtigtenVon>", "");
@@ -90,16 +95,28 @@ namespace webuntis2BlaueBriefe
                 else
                 {
                     FindAndReplace(wordApp, "<AnDieErziehungsberechtigtenVon>", "An die Erziehungsberechtigten von");
+                    Protokoll += "An die Erziehungsberechtigten von ";
                 }
 
                 FindAndReplace(wordApp, "<anrede>", GetAnrede());
                 FindAndReplace(wordApp, "<vorname>", Vorname);
                 FindAndReplace(wordApp, "<nachname>", Nachname);
+
+                Protokoll += Vorname + " " + Nachname + " ";
+
                 if (!Volljaehrig)
                 {
                     FindAndReplace(wordApp, "<plz>", sorgeberechtigter.Plz);
                     FindAndReplace(wordApp, "<straße>", sorgeberechtigter.Strasse);
                     FindAndReplace(wordApp, "<ort>", sorgeberechtigter.Ort);
+                    Protokoll += sorgeberechtigter.Strasse + " " + sorgeberechtigter.Plz + " " + sorgeberechtigter.Ort + " ";
+                }
+                else
+                {
+                    FindAndReplace(wordApp, "<plz>", Plz);
+                    FindAndReplace(wordApp, "<straße>", Strasse);
+                    FindAndReplace(wordApp, "<ort>", Ort);
+                    Protokoll += Strasse + " " + Plz + " " + Ort + " ";
                 }
                 FindAndReplace(wordApp, "<klasse>", Klasse);
                 FindAndReplace(wordApp, "<heute>", DateTime.Now.ToShortDateString());
@@ -110,7 +127,9 @@ namespace webuntis2BlaueBriefe
                 FindAndReplace(wordApp, "<absatz3>", GetAbsatz3());
                 FindAndReplace(wordApp, "<klassenleitung>", Klassenleitung);
                 FindAndReplace(wordApp, "<klassenlehrerIn>", KlassenleitungMw == "Herr" ? "Klassenlehrer" : "Klassenlehrerin");
-                
+
+                Protokoll += "</td>";
+
                 FindAndReplace(wordApp, "<hinweis>", GetHinweis());
                 aDoc.Save();
                 aDoc.Close();
@@ -276,25 +295,25 @@ namespace webuntis2BlaueBriefe
                                   || Global.Ungenügend.Contains(f.NoteHalbjahr)
                                   select f).Count()  == 0)
             {
-                x = "kein ";                
+                x = "";                
             }
 
-            x += "Defizit: ";
+            x += "";
 
             foreach (var item in Fachs)
             {
-                x += item.KürzelUntis + "(" + item.NoteHalbjahr + "),";
+                x += "<br>" + item.KürzelUntis + "<br>(" + (from g in Global.Noten where item.NoteHalbjahr == g.Stufe select g.Klartext).FirstOrDefault() + "),";
             }
             return x.TrimEnd(',');
         }
 
         private string RenderNotenJetzt()
         {
-            string x = "Defizit: ";
+            string x = "";
 
             foreach (var item in Fachs)
             {
-                x += item.KürzelUntis + "(" + item.NoteHalbjahr + "->" + item.NoteJetzt + "),";
+                x += "<br>" + item.KürzelUntis + "<br>(" + (from g in Global.Noten where item.NoteHalbjahr == g.Stufe select g.Klartext).FirstOrDefault() + "->" + (from g in Global.Noten where item.NoteJetzt == g.Stufe select g.Klartext).FirstOrDefault() + ")";
             }
             return x.TrimEnd(',');
         }

@@ -10,9 +10,9 @@ namespace webuntis2BlaueBriefe
         {
         }
 
-        public Lehrers(string aktSj, string connectionString, Periodes periodes)
+        public Lehrers(Periodes periodes)
         {
-            using (OleDbConnection oleDbConnection = new OleDbConnection(connectionString))
+            using (OleDbConnection oleDbConnection = new OleDbConnection(Global.ConnectionStringUntis))
             {
                 try
                 {
@@ -29,7 +29,7 @@ Teacher.Text2,
 Teacher.Text3,
 Teacher.PlannedWeek
 FROM Teacher 
-WHERE (((SCHOOLYEAR_ID)= " + aktSj + ") AND  ((TERM_ID)=" + periodes.Count + ") AND ((Teacher.SCHOOL_ID)=177659) AND (((Teacher.Deleted)=No))) ORDER BY Teacher.Name;";
+WHERE (((SCHOOLYEAR_ID)= " + Global.AktSjUntis + ") AND  ((TERM_ID)=" + periodes.Count + ") AND ((Teacher.SCHOOL_ID)=177659) AND (((Teacher.Deleted)=No))) ORDER BY Teacher.Name;";
 
                     OleDbCommand oleDbCommand = new OleDbCommand(queryString, oleDbConnection);
                     oleDbConnection.Open();
