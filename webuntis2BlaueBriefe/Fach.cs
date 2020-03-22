@@ -1,4 +1,6 @@
-﻿namespace webuntis2BlaueBriefe
+﻿using System.Linq;
+
+namespace webuntis2BlaueBriefe
 {
     public class Fach
     {
@@ -12,8 +14,8 @@
             BezeichnungImZeugnis = bezeichnungImZeugnis;
             NoteJetzt = noteJetzt;
             NoteHalbjahr = noteHalbjahr;
-            NeuesDefizit = !Global.Mangelhaft.Contains(noteHalbjahr) 
-                && !Global.Ungenügend.Contains(noteHalbjahr) ? true : false;  
+            NeuesDefizit = (from g in Global.Noten where g.Stufe == noteHalbjahr select g.Klartext).FirstOrDefault() == (from g in Global.Noten where g.Stufe == noteJetzt select g.Klartext).FirstOrDefault() ? false : true;  
+
         }
 
         public int IdUntis { get; set; }

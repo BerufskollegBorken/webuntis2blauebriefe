@@ -52,7 +52,7 @@ namespace webuntis2BlaueBriefe
             if (art == "G")
             {
                 Console.Write("Gefährdung ...");
-                Protokoll += "<td>Gefährdung " + RenderGefährdungNeu() + " </td>";
+                Protokoll += "<td>" + RenderGefährdungNeu() + " </td>";
             }
             else
             {
@@ -138,30 +138,21 @@ namespace webuntis2BlaueBriefe
 
                 FindAndReplace(wordApp, "<hinweis>", GetHinweis());
                 aDoc.Save();
-                aDoc.Close();
+                aDoc.Close();            
                 System.Runtime.InteropServices.Marshal.ReleaseComObject(aDoc);
                 aDoc = null;
                 GC.Collect();
+                wordApp.Quit();
             }
         }
 
         private string RenderGefährdungNeu()
         {
-            string x = "";
-
-            if ((from f in Fachs
-                 where Global.Mangelhaft.Contains(f.NoteHalbjahr)
-                 || Global.Ungenügend.Contains(f.NoteHalbjahr)
-                 select f).Count() == 0)
+            string x = "Neu hinzukommende Gefährdung: ";
+                        
+            foreach (var item in (from f in Fachs where f.NeuesDefizit select f).ToList())
             {
-                x = "";
-            }
-
-            x += "";
-
-            foreach (var item in Fachs)
-            {
-                x += "<br>" + item.KürzelUntis + "<br>(" + (from g in Global.Noten where item.NoteHalbjahr == g.Stufe select g.Klartext).FirstOrDefault() + "),";
+                x += " " + item.KürzelUntis + "(" + (from g in Global.Noten where item.NoteJetzt == g.Stufe select g.Klartext).FirstOrDefault() + "),";
             }
             return x.TrimEnd(',');
         }
@@ -175,11 +166,11 @@ namespace webuntis2BlaueBriefe
         {
             if (art == "G")
             {
-                return "abweichend von " + (this.Fachs.Count() > 1 ? "den" : "der") + " im letzten Zeugnis erteilten Note" + (this.Fachs.Count() > 1 ? "n" : "") + " nicht mehr " + (this.Fachs.Count() > 1 ? "ausreichen" : "ausreicht") + ".";
+                return "abweichend von " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "den" : "der") + " im letzten Zeugnis erteilten Note" + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "n" : "") + " nicht mehr " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "ausreichen" : "ausreicht") + ".";
             }
             else
             {
-                return "abweichend von " + (this.Fachs.Count() > 1 ? "den" : "der") + " im letzten Zeugnis erteilten Note" + (this.Fachs.Count() > 1 ? "n" : "") + " nicht mehr " + (this.Fachs.Count() > 1 ? "ausreichen" : "ausreicht") + ". Stellt sich eine weitere nicht ausreichende Leistung ein, ist die Versetzung gefährdet.";
+                return "abweichend von " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "den" : "der") + " im letzten Zeugnis erteilten Note" + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "n" : "") + " nicht mehr " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "ausreichen" : "ausreicht") + ". Stellt sich eine weitere nicht ausreichende Leistung ein, ist die Versetzung gefährdet.";
             }            
         }
 
@@ -189,22 +180,22 @@ namespace webuntis2BlaueBriefe
             {
                 if (Geschlecht.ToLower() == "m")
                 {
-                    return "Sie werden darüber unterrichtet, dass die Leistung" + (this.Fachs.Count() > 1 ? "en" : "") + " Ihres Sohnes " + Vorname + ", Klasse " + Klasse + ", in " + (this.Fachs.Count() > 1 ? "den Fächern" : "dem Fach");
+                    return "Sie werden darüber unterrichtet, dass die Leistung" + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "en" : "") + " Ihres Sohnes " + Vorname + ", Klasse " + Klasse + ", in " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "den Fächern" : "dem Fach");
                 }
                 else
                 {
-                    return "Sie werden darüber unterrichtet, dass die Leistung" + (this.Fachs.Count() > 1 ? "en" : "") + " Ihrer Tochter " + Vorname + ", Klasse " + Klasse + ", in " + (this.Fachs.Count() > 1 ? "den Fächern" : "dem Fach");
+                    return "Sie werden darüber unterrichtet, dass die Leistung" + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "en" : "") + " Ihrer Tochter " + Vorname + ", Klasse " + Klasse + ", in " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "den Fächern" : "dem Fach");
                 }
             }
             else
             {
-                return "Sie werden darüber unterrichtet, dass Ihre Leistung" + (this.Fachs.Count() > 1 ? "en" : "") + " in " + (this.Fachs.Count() > 1 ? "den Fächern" : "dem Fach");
+                return "Sie werden darüber unterrichtet, dass Ihre Leistung" + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "en" : "") + " in " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "den Fächern" : "dem Fach");
             }
         }
 
         internal void RenderBrief()
         {
-            Console.Write(Klasse + " " + Nachname + (Volljaehrig ? "(vollj.)" : "") + "; HZ: " + RenderNotenHz() + "; Jetzt: " + RenderNotenJetzt() + "; ");
+            Console.Write(Nachname + (Volljaehrig ? "(vollj.)" : "") + "; HZ: " + RenderNotenHz() + "; Jetzt: " + RenderNotenJetzt() + "; ");
             
             Protokoll = "<td>" + Nachname + ", " + Vorname + "</td><td>" + (Volljaehrig ? "J" : "N") + "</td><td>" + RenderNotenHz() + "</td><td>" + RenderNotenJetzt() + "</td>";
 
@@ -305,7 +296,7 @@ namespace webuntis2BlaueBriefe
                                           where Global.Mangelhaft.Contains(f.NoteHalbjahr)
                                           select f).Count())
                 {
-                    RenderGefährdung();             
+                    RenderMitteilung("G");             
                 }
 
                 //Abschlussklasse erhalten keine Benachrichtigung
@@ -329,7 +320,7 @@ namespace webuntis2BlaueBriefe
 
             foreach (var item in Fachs)
             {
-                x += "<br>" + item.KürzelUntis + "<br>(" + (from g in Global.Noten where item.NoteHalbjahr == g.Stufe select g.Klartext).FirstOrDefault() + "),";
+                x += " " + item.KürzelUntis + "(" + (from g in Global.Noten where item.NoteHalbjahr == g.Stufe select g.Klartext).FirstOrDefault() + "),";
             }
             return x.TrimEnd(',');
         }
@@ -340,7 +331,7 @@ namespace webuntis2BlaueBriefe
 
             foreach (var item in Fachs)
             {
-                x += "<br>" + item.KürzelUntis + "<br>(" + (from g in Global.Noten where item.NoteHalbjahr == g.Stufe select g.Klartext).FirstOrDefault() + "->" + (from g in Global.Noten where item.NoteJetzt == g.Stufe select g.Klartext).FirstOrDefault() + ")";
+                x += " " + item.KürzelUntis + "(" + (from g in Global.Noten where item.NoteJetzt == g.Stufe select g.Klartext).FirstOrDefault() + "),";
             }
             return x.TrimEnd(',');
         }
@@ -407,7 +398,7 @@ Leistung";
         {
             string x = "";
 
-            foreach (var fach in Fachs)
+            foreach (var fach in (from f in Fachs where f.NeuesDefizit select f).ToList())
             {
                 x += " " + fach.BezeichnungImZeugnis + " (" + (Global.Mangelhaft.Contains(fach.NoteJetzt) ? "mangelhaft":"") + (Global.Ungenügend.Contains(fach.NoteJetzt) ? "ungenügend" : "") + ")," ;
             }
@@ -479,9 +470,7 @@ Leistung";
                         }
                     }
                 }
-
-                // Nur Fächer mit Defizit werden gesetzt
-
+                
                 if (noteJetzt != null)
                 {
                     this.Fachs.Add(new Fach(dFach, (from f in fachs where f.KürzelUntis == dFach select f.BezeichnungImZeugnis).FirstOrDefault(), noteJetzt,noteHalbjahr));

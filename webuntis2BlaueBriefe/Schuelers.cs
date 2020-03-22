@@ -166,8 +166,8 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
             message.Body = @"Guten Tag " + schülerDieserKlasse[0].Klassenleitung + "," +
                 "<br><br>Sie erhalten diese Mail in Ihrer Eigenschaft als Klassenleitung der Klasse " + schülerDieserKlasse[0].Klasse + "." +
                 "<br><br>" +
-                "Bitte prüfen Sie die im Folgenden automatisch erstellten und aufgelisteten Blauen Briefe gewissenhaft. Die Verantwortung für die Richtigkeit liegt ganz allein bei Ihnen.</br>" +
-                "<br><table border = 1><tr><td>Name</td><td>Vollj.</td><td>Halbjahreszeugnis</td><td>Aktueller Notenstand aller abweichenden Fächer</td><td>Gefährdung / Mitteilung Leistungsstand</td><td>Anschrift(en)</td></tr>";
+                "Bitte prüfen Sie die im Folgenden automatisch erstellten und aufgelisteten Blauen Briefe gewissenhaft. Die Verantwortung für die Richtigkeit liegt ganz allein bei Ihnen. Achten Sie beispielsweise darauf, dass kein Fach des Differenzierungsbereichs angemahnt wird.</br>" +
+                "<br><table border = 1><tr><td>Name</td><td>Vollj.</td><td>Halbjahreszeugnis</td><td>Aktueller Notenstand<br> aller abweichenden <br>Fächer</td><td>Gefährdung / Mitteilung Leistungsstand</td><td>Anschrift(en)</td></tr>";
 
             foreach (var s in schülerDieserKlasse)
             {
@@ -175,7 +175,7 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
             }
 
             message.Body += "</table></br>" +
-                "Wer sich nicht meldet, bestätigt damit die Richtigkeit. Die Briefe werden dann zeitnah verschickt." +
+                "Wenn Sie sich nicht zeitnah zurückmelden, bestätigen damit die Richtigkeit. Die Briefe werden dann alsbald verschickt." +
                 "</br></br>" +
                 "Stefan Bäumer" +
                 "";
@@ -188,6 +188,8 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
 
         internal void RenderBriefe()
         {
+            Console.WriteLine(this[0].Klasse + "\n" + "=".PadRight(this[0].Klasse.Length - 1, '='));
+
             foreach (var schueler in this)
             {
                 schueler.RenderBrief();
