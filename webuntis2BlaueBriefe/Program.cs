@@ -13,7 +13,7 @@ namespace webuntis2BlaueBriefe
 
             try
             {                               
-                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2020 | Version 202000323");
+                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2020 | Version 202000322");
                 Console.WriteLine("====================================================================================================");
                 Console.WriteLine("");
 
@@ -25,7 +25,6 @@ namespace webuntis2BlaueBriefe
                 Lehrers lehrers = new Lehrers(periodes);
                 Klasses klasses = new Klasses(lehrers, periodes);                
                 DefizitäreLeistungen defizitäreLeistungen = new DefizitäreLeistungen(fachs,stundentafels);
-
                 Schuelers schuelerMitDefiziten = new Schuelers(defizitäreLeistungen, klasses, lehrers, fachs);
                 
                 schuelerMitDefiziten.RenderBriefe();
