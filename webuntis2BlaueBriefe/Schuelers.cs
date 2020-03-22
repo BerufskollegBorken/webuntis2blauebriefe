@@ -63,8 +63,10 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
 
                         var x = (from s in this where s.IdAtlantis == idAtlantis select s).FirstOrDefault();
 
-                        Schueler schueler = new Schueler();
-                        schueler.Sorgeberechtigte = new Sorgeberechtigte();
+                        Schueler schueler = new Schueler()
+                        {
+                            Sorgeberechtigte = new Sorgeberechtigte()
+                        };
 
                         while (reader.Read())
                         {
@@ -142,16 +144,18 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
 
         private void Mail(List<Schueler> schülerDieserKlasse)
         {
-            ExchangeService exchangeService = new ExchangeService();
-
-            exchangeService.UseDefaultCredentials = true;
-            exchangeService.TraceEnabled = false;
-            exchangeService.TraceFlags = TraceFlags.All;
-            exchangeService.Url = new Uri("https://ex01.bkb.local/EWS/Exchange.asmx");
+            ExchangeService exchangeService = new ExchangeService()
+            {
+                UseDefaultCredentials = true,
+                TraceEnabled = false,
+                TraceFlags = TraceFlags.All,
+                Url = new Uri("https://ex01.bkb.local/EWS/Exchange.asmx")
+            };
 
             EmailMessage message = new EmailMessage(exchangeService);
 
             message.ToRecipients.Add("stefan.baeumer@berufskolleg-borken.de");
+            message.BccRecipients.Add(schülerDieserKlasse[0].KlassenleitungMail);
 
             foreach (var s in schülerDieserKlasse)
             {
@@ -166,7 +170,7 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
             message.Body = @"Guten Tag " + schülerDieserKlasse[0].Klassenleitung + "," +
                 "<br><br>Sie erhalten diese Mail in Ihrer Eigenschaft als Klassenleitung der Klasse " + schülerDieserKlasse[0].Klasse + "." +
                 "<br><br>" +
-                "Bitte prüfen Sie die im Folgenden automatisch erstellten und aufgelisteten Blauen Briefe gewissenhaft. Die Verantwortung für die Richtigkeit liegt ganz allein bei Ihnen. Achten Sie beispielsweise darauf, dass kein Fach des Differenzierungsbereichs angemahnt wird.</br>" +
+                "Bitte prüfen Sie die im Folgenden automatisch erstellten und aufgelisteten Blauen Briefe gewissenhaft. Die Verantwortung für die Richtigkeit liegt ganz allein bei Ihnen. Achten Sie darauf, dass kein Fach des Differenzierungsbereichs angemahnt wird.</br>" +
                 "<br><table border = 1><tr><td>Name</td><td>Vollj.</td><td>Halbjahreszeugnis</td><td>Aktueller Notenstand<br> aller abweichenden <br>Fächer</td><td>Gefährdung / Mitteilung Leistungsstand</td><td>Anschrift(en)</td></tr>";
 
             foreach (var s in schülerDieserKlasse)
