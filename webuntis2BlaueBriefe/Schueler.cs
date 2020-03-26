@@ -105,8 +105,10 @@ namespace webuntis2BlaueBriefe
                 }
 
                 FindAndReplace(wordApp, "<anrede>", GetAnrede());
-                FindAndReplace(wordApp, "<vorname>", Vorname);
+                FindAndReplace(wordApp, "<anredeLerncoaching>", GetAnredeLerncoaching());
+                FindAndReplace(wordApp, "<vorname>", Vorname); 
                 FindAndReplace(wordApp, "<nachname>", Nachname);
+                FindAndReplace(wordApp, "<dichSie>", Volljaehrig ? "Sie" : "Dich");
 
                 Protokoll += Vorname + " " + Nachname + " ";
 
@@ -144,6 +146,21 @@ namespace webuntis2BlaueBriefe
                 GC.Collect();
                 wordApp.Quit();
             }
+        }
+
+        private object GetAnredeLerncoaching()
+        {
+            string x = "";
+            
+            x += "Liebe" + (GeschlechtMw == "M" ? "r " : " ") + Vorname;
+
+            if (!Volljaehrig)
+            {
+                x += ",\r\nliebe Erziehungsberechtigte";
+            }
+
+            x += "!";
+            return x;
         }
 
         private string RenderGefährdungNeu()
@@ -400,9 +417,9 @@ Leistung";
 
             foreach (var fach in (from f in Fachs where f.NeuesDefizit select f).ToList())
             {
-                x += " " + fach.BezeichnungImZeugnis + " (" + (Global.Mangelhaft.Contains(fach.NoteJetzt) ? "mangelhaft":"") + (Global.Ungenügend.Contains(fach.NoteJetzt) ? "ungenügend" : "") + ")," ;
+                x += " " + fach.BezeichnungImZeugnis + " (" + (Global.Mangelhaft.Contains(fach.NoteJetzt) ? "mangelhaft":"") + (Global.Ungenügend.Contains(fach.NoteJetzt) ? "ungenügend" : "") + ")\r\n";
             }
-            return x.TrimEnd(',');
+            return x.Replace(" **)","");
         }
         
         private static void FindAndReplace(Application doc, object findText, object replaceWithText)
