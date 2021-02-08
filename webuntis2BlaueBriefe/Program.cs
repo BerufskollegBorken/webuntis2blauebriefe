@@ -11,8 +11,12 @@ namespace webuntis2BlaueBriefe
         {
             System.Net.ServicePointManager.ServerCertificateValidationCallback = ((sender, certificate, chain, sslPolicyErrors) => true);
 
+            string steuerdatei = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), DateTime.Now.ToString("yyMMdd-HHmmss") + "_webuntisnoten2atlantis_" + System.Security.Principal.WindowsIdentity.GetCurrent().Name.ToUpper().Split('\\')[1] + ".csv");
+
             try
-            {                               
+            {
+                Global.Zeilen = new List<string>() { "AnDieErziehungsberechtigtenVon; anrede; anredeLerncoaching; vorname; nachname; dichSie; plz; straße; ort; klasse; heute; betreff; absatz1; fächer; absatz2; absatz3; klassenleitung; klassenlehrerIn; hinweis"};
+
                 Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2020 | Version 202000322");
                 Console.WriteLine("====================================================================================================");
                 Console.WriteLine("");
@@ -27,7 +31,7 @@ namespace webuntis2BlaueBriefe
                 DefizitäreLeistungen defizitäreLeistungen = new DefizitäreLeistungen(fachs,stundentafels);
                 Schuelers schuelerMitDefiziten = new Schuelers(defizitäreLeistungen, klasses, lehrers, fachs);
                 
-                schuelerMitDefiziten.RenderBriefe();
+                schuelerMitDefiziten.RenderBriefeUndSteuerdatei(steuerdatei);
 
                 schuelerMitDefiziten.MailAnKlassenlehrer();
                 Console.WriteLine("Verarbeitung beendet. ENTER");

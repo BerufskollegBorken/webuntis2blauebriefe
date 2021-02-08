@@ -16,7 +16,11 @@ namespace webuntis2BlaueBriefe
             using (StreamReader reader = new StreamReader(Global.InputNotenCsv))
             {
                 string überschrift = reader.ReadLine();
-                
+
+                int i = 1;
+
+                Leistung leistung = new Leistung();
+
                 while (true)
                 {
                     string line = reader.ReadLine();
@@ -24,21 +28,62 @@ namespace webuntis2BlaueBriefe
                     try
                     {
                         if (line != null)
-                        {
-                            Leistung leistung = new Leistung();
+                        {                            
                             var x = line.Split('\t');
-                            leistung.Datum = DateTime.ParseExact(x[0], "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture);
-                            leistung.Name = x[1];
-                            leistung.Klasse = x[2];
-                            leistung.Fach = (from f in fachs where f.KürzelUntis.ToString() == x[3] select f).FirstOrDefault();
-                            leistung.Prüfungsart = x[4];
-                            leistung.Note = x[5];
-                            leistung.Bemerkung = x[6];
-                            leistung.Benutzer = x[7];
-                            leistung.SchlüsselExtern = Convert.ToInt32(x[8]);
+                            i++;
+
+                            if (i==2629)
+                            {
+                                string a = "";
+                            }
+                            if (x.Length == 10)
+                            {
+                                leistung = new Leistung();
+                                leistung.Datum = DateTime.ParseExact(x[0], "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                                leistung.Name = x[1];
+                                leistung.Klasse = x[2];
+                                leistung.Fach = (from f in fachs where f.KürzelUntis.ToString() == x[3] select f).FirstOrDefault();
+                                leistung.Prüfungsart = x[4];
+                                leistung.BlauerBriefNote = x[5];
+                                leistung.Halbjahresgesamtnote = x[9];
+                                leistung.Bemerkung = x[6];
+                                leistung.Benutzer = x[7];
+                                leistung.SchlüsselExtern = Convert.ToInt32(x[8]);
+                            }
+
+                            // Wenn in den Bemerkungen eine zusätzlicher Umbruch eingebaut wurde:
+
+                            if (x.Length == 7)
+                            {
+                                leistung = new Leistung();
+                                leistung.Datum = DateTime.ParseExact(x[0], "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                                leistung.Name = x[1];
+                                leistung.Klasse = x[2];
+                                leistung.Fach = (from f in fachs where f.KürzelUntis.ToString() == x[3] select f).FirstOrDefault();
+                                leistung.BlauerBriefNote = x[5];
+                                leistung.Bemerkung = x[6];
+                                Console.WriteLine("\n\n  [!] Achtung: In den Zeilen " + (i - 1) + "-" + i + " hat vermutlich die Lehrkraft eine Bemerkung mit einem Zeilen-");
+                                Console.Write("      umbruch eingebaut. Es wird nun versucht trotzdem korrekt zu importieren ... ");
+                            }
+
+                            if (x.Length == 4)
+                            {
+                                leistung.Benutzer = x[1];
+                                leistung.SchlüsselExtern = Convert.ToInt32(x[2]);
+                                leistung.Halbjahresgesamtnote = x[3];
+                                Console.WriteLine("hat geklappt.\n");                                
+                            }
+
+                            if (x.Length < 4)
+                            {
+                                Console.WriteLine("\n\n[!] MarksPerLesson.CSV: In der Zeile " + i + " stimmt die Anzahl der Spalten nicht. Das kann passieren, wenn z. B. die Lehrkraft bei einer Bemerkung einen Umbruch eingibt. Mit Suchen & Ersetzen kann die Datei MarksPerLesson.CSV korrigiert werden.");
+                                Console.ReadKey();                                
+                                throw new Exception("\n\n[!] MarksPerLesson.CSV: In der Zeile " + i + " stimmt die Anzahl der Spalten nicht. Das kann passieren, wenn z. B. die Lehrkraft bei einer Bemerkung einen Umbruch eingibt. Mit Suchen & Ersetzen kann die Datei MarksPerLesson.CSV korrigiert werden.");
+                            }
 
                             // Nur Halbjahresnoten und Blaue Briefe sind relevant. Differenzierungsbereich zählt nicht.
-                            if (Global.Mangelhaft.Contains(leistung.Note) || Global.Ungenügend.Contains(leistung.Note))
+
+                            if (Global.Mangelhaft.Contains(leistung.BlauerBriefNote) || Global.Ungenügend.Contains(leistung.BlauerBriefNote))
                             {
                                 if (leistung.Prüfungsart == Global.BlaueBriefe)
                                 {
@@ -52,11 +97,7 @@ namespace webuntis2BlaueBriefe
                                         Console.ReadKey();
                                     }                               
                                 }                               
-                            }
-                            if (leistung.Prüfungsart == Global.Halbjahreszeugnis)
-                            {
-                                this.Add(leistung);
-                            }
+                            }                            
                         }
                     }
                     catch (Exception ex)

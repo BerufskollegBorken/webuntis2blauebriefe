@@ -3,7 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Odbc;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace webuntis2BlaueBriefe
 {
@@ -186,7 +189,7 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
             Console.WriteLine(schülerDieserKlasse[0].Klasse + " " + schülerDieserKlasse[0].Klassenleitung  + ": Mail gesendet.");
         }
 
-        internal void RenderBriefe()
+        internal void RenderBriefeUndSteuerdatei(string steuerdatei)
         {
             Console.WriteLine(this[0].Klasse + "\n" + "=".PadRight(this[0].Klasse.Length - 1, '='));
 
@@ -194,7 +197,47 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
             {
                 schueler.RenderBrief();
             }
+
+            using (StreamWriter writer = new StreamWriter(steuerdatei , true, Encoding.Default))
+            {
+                foreach (var o in Global.Zeilen)
+                {
+                    writer.WriteLine(o);
+                }
+            }
+
+            OpenFile(steuerdatei);
         }
+
+        private void OpenFile(string steuerdatei)
+        {
+            try
+            {
+                Process notepadPlus = new Process();
+                notepadPlus.StartInfo.FileName = "notepad++.exe";
+
+                notepadPlus.StartInfo.Arguments = steuerdatei;
+
+                notepadPlus.Start();
+            }
+            catch (Exception)
+            {
+                System.Diagnostics.Process.Start("Notepad.exe", steuerdatei);
+            }
+        }
+
+        internal void RenderSteuerdatei()
+        {
+            Console.WriteLine(this[0].Klasse + "\n" + "=".PadRight(this[0].Klasse.Length - 1, '='));
+
+            
+
+            foreach (var schueler in this)
+            {
+                schueler.RenderBrief();
+            }
+        }
+
 
         internal Schuelers FilterDefizitschüler(DefizitäreLeistungen defizitäreLeistungen, Fachs fachs)
         {

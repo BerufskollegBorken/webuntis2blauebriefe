@@ -73,11 +73,13 @@ namespace webuntis2BlaueBriefe
 
             foreach (var strasse in sss)
             {
+                string zeile = "";
+
                 var sorgeberechtigter = (from s in this.Sorgeberechtigte where s.Strasse == strasse select s).FirstOrDefault();
 
                 var origFileName = "Blaue Briefe.docx";
                 
-                var fileName = @"c:\\users\\bm\\Desktop\\" + DateTime.Now.ToString("yyyyMMdd") + "-" + Nachname + "-" + Vorname + (x > 1 ? strasse : "") + (art == "G" ? "-Gefährdung-Der-Versetzung.docx" : "-Mitteilung-Leistungsstand.docx");
+                var fileName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + DateTime.Now.ToString("yyyyMMdd") + "-" + Nachname + "-" + Vorname + (x > 1 ? strasse : "") + (art == "G" ? "-Gefährdung-Der-Versetzung.docx" : "-Mitteilung-Leistungsstand.docx");
 
                 Dateien.Add(fileName);
 
@@ -96,55 +98,78 @@ namespace webuntis2BlaueBriefe
 
                 if (Volljaehrig)
                 {
-                    FindAndReplace(wordApp, "<AnDieErziehungsberechtigtenVon>", "");
+                    FindAndReplace(wordApp, "<AnDieErziehungsberechtigtenVon>", "");                    
                 }
                 else
                 {
                     FindAndReplace(wordApp, "<AnDieErziehungsberechtigtenVon>", "An die Erziehungsberechtigten von");
                     Protokoll += "An die Erziehungsberechtigten von ";
+                    zeile += "An die Erziehungsberechtigten von " + ";";
                 }
 
                 FindAndReplace(wordApp, "<anrede>", GetAnrede());
+                zeile += GetAnrede() + ";";
                 FindAndReplace(wordApp, "<anredeLerncoaching>", GetAnredeLerncoaching());
-                FindAndReplace(wordApp, "<vorname>", Vorname); 
+                zeile += GetAnredeLerncoaching() + ";";
+                FindAndReplace(wordApp, "<vorname>", Vorname);
+                zeile += Vorname + ";";
                 FindAndReplace(wordApp, "<nachname>", Nachname);
+                zeile += Nachname + ";";
                 FindAndReplace(wordApp, "<dichSie>", Volljaehrig ? "Sie" : "Dich");
+                zeile += (Volljaehrig ? "Sie" : "Dich") + ";";
 
                 Protokoll += Vorname + " " + Nachname + " ";
 
                 if (!Volljaehrig)
                 {
                     FindAndReplace(wordApp, "<plz>", sorgeberechtigter.Plz);
+                    zeile += sorgeberechtigter.Plz + ";";
                     FindAndReplace(wordApp, "<straße>", sorgeberechtigter.Strasse);
+                    zeile += sorgeberechtigter.Strasse + ";";
                     FindAndReplace(wordApp, "<ort>", sorgeberechtigter.Ort);
+                    zeile += sorgeberechtigter.Ort + ";";
                     Protokoll += sorgeberechtigter.Strasse + " " + sorgeberechtigter.Plz + " " + sorgeberechtigter.Ort + " ";
                 }
                 else
                 {
                     FindAndReplace(wordApp, "<plz>", Plz);
+                    zeile += Plz + ";";
                     FindAndReplace(wordApp, "<straße>", Strasse);
+                    zeile += Strasse + ";";
                     FindAndReplace(wordApp, "<ort>", Ort);
+                    zeile += Ort + ";";
                     Protokoll += Strasse + " " + Plz + " " + Ort + " ";
                 }
                 FindAndReplace(wordApp, "<klasse>", Klasse);
+                zeile += Klasse + ";";
                 FindAndReplace(wordApp, "<heute>", DateTime.Now.ToShortDateString());
+                zeile += DateTime.Now.ToShortDateString() + ";";
                 FindAndReplace(wordApp, "<betreff>", art == "G" ? "Gefährdung der Versetzung" : "Mitteilung über den Leistungsstand");
+                zeile += art == "G" ? "Gefährdung der Versetzung" : "Mitteilung über den Leistungsstand" + ";";
                 FindAndReplace(wordApp, "<absatz1>", GetAbsatz1(art));
+                zeile += GetAbsatz1(art) + ";";
                 FindAndReplace(wordApp, "<fächer>", RenderFächer());
+                zeile += RenderFächer() + ";";
                 FindAndReplace(wordApp, "<absatz2>", GetAbsatz2(art));
+                zeile += GetAbsatz2(art) + ";";
                 FindAndReplace(wordApp, "<absatz3>", GetAbsatz3());
+                zeile += GetAbsatz3() + ";";
                 FindAndReplace(wordApp, "<klassenleitung>", Klassenleitung);
+                zeile += Klassenleitung + ";";
                 FindAndReplace(wordApp, "<klassenlehrerIn>", KlassenleitungMw == "Herr" ? "Klassenlehrer" : "Klassenlehrerin");
+                zeile += (KlassenleitungMw == "Herr" ? "Klassenlehrer" : "Klassenlehrerin") + ";";
 
                 Protokoll += "</td>";
 
                 FindAndReplace(wordApp, "<hinweis>", GetHinweis());
+                zeile += GetHinweis() + ";";
                 aDoc.Save();
                 aDoc.Close();            
                 System.Runtime.InteropServices.Marshal.ReleaseComObject(aDoc);
                 aDoc = null;
                 GC.Collect();
                 wordApp.Quit();
+                Global.Zeilen.Add(zeile);
             }
         }
 
@@ -478,11 +503,11 @@ Leistung";
                         {
                             if (d.Prüfungsart.Contains("laue"))
                             {
-                                noteJetzt = d.Note;
+                                noteJetzt = d.BlauerBriefNote;
                             }
                             if (d.Prüfungsart.Contains("albjahres"))
                             {
-                                noteHalbjahr = d.Note;
+                                noteHalbjahr = d.BlauerBriefNote;
                             }
                         }
                     }

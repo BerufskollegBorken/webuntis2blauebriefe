@@ -1,4 +1,3 @@
-U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Debug\webuntis2BlaueBriefe.csprojResolveAssemblyReference.cache
 U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\webuntis2BlaueBriefe.exe.config
 U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\webuntis2BlaueBriefe.exe
 U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\webuntis2BlaueBriefe.pdb
@@ -10,3 +9,6 @@ U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\Microsoft.Ex
 U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\Microsoft.Exchange.WebServices.xml
 U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\Microsoft.Exchange.WebServices.Auth.pdb
 U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\Microsoft.Exchange.WebServices.Auth.xml
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Debug\webuntis2BlaueBriefe.csprojAssemblyReference.cache
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Debug\webuntis2BlaueBriefe.csproj.CoreCompileInputs.cache
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Debug\webuntis2BlaueBriefe.csproj.CopyComplete

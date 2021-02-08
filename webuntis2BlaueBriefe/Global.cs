@@ -57,7 +57,9 @@ namespace webuntis2BlaueBriefe
         public static string ConnectionStringUntis = @"Provider = Microsoft.Jet.OLEDB.4.0; Data Source=M:\\Data\\gpUntis.mdb;";
 
         public static string InputNotenCsv = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\MarksPerLesson.csv";
-        
+
+        public static List<string> Zeilen;
+
         public static string AktSjUntis
         {
             get
