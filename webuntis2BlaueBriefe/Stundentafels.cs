@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.OleDb;
+using System.Data.SqlClient;
 using System.Linq;
 
 namespace webuntis2BlaueBriefe
@@ -11,7 +11,7 @@ namespace webuntis2BlaueBriefe
         {
             try
             {
-                using (OleDbConnection oleDbConnection = new OleDbConnection(Global.ConnectionStringUntis))
+                using (SqlConnection sqlConnection = new SqlConnection(Global.ConnectionStringUntis))
                 {
                     string queryString = @"SELECT 
 PeriodsTable.PERIODS_TABLE_ID, 
@@ -19,24 +19,24 @@ PeriodsTable.Name,
 PeriodsTable.Longname, 
 PeriodsTable.PerTabElement1
 FROM PeriodsTable
-WHERE (((PeriodsTable.SCHOOLYEAR_ID)=" + Global.AktSjUntis + ") AND ((PeriodsTable.Deleted)=No)) ORDER BY Name;";
+WHERE (((PeriodsTable.SCHOOLYEAR_ID)=" + Global.AktSjUntis + ") AND ((PeriodsTable.Deleted)='false')) ORDER BY Name;";
 
-                    OleDbCommand oleDbCommand = new OleDbCommand(queryString, oleDbConnection);
-                    oleDbConnection.Open();
-                    OleDbDataReader oleDbDataReader = oleDbCommand.ExecuteReader();
+                    SqlCommand odbcCommand = new SqlCommand(queryString, sqlConnection);
+                    sqlConnection.Open();
+                    SqlDataReader sqlDataReader = odbcCommand.ExecuteReader();
 
-                    while (oleDbDataReader.Read())
+                    while (sqlDataReader.Read())
                     { 
                         try
                         {
-                            if (!(from s in this where s.IdUntis == oleDbDataReader.GetInt32(0) select s).Any())
+                            if (!(from s in this where s.IdUntis == sqlDataReader.GetInt32(0) select s).Any())
                             {
                                 Stundentafel stundentafel = new Stundentafel();
 
-                                stundentafel.IdUntis = oleDbDataReader.GetInt32(0);
-                                stundentafel.Name = Global.SafeGetString(oleDbDataReader, 1);
-                                stundentafel.Langname = Global.SafeGetString(oleDbDataReader, 2);
-                                var elemente = (Global.SafeGetString(oleDbDataReader, 3)).Split(',');
+                                stundentafel.IdUntis = sqlDataReader.GetInt32(0);
+                                stundentafel.Name = Global.SafeGetString(sqlDataReader, 1);
+                                stundentafel.Langname = Global.SafeGetString(sqlDataReader, 2);
+                                var elemente = (Global.SafeGetString(sqlDataReader, 3)).Split(',');
 
                                 for (int i = 0; i < elemente.Count(); i++)
                                 {
@@ -73,8 +73,8 @@ WHERE (((PeriodsTable.SCHOOLYEAR_ID)=" + Global.AktSjUntis + ") AND ((PeriodsTab
                         }
                     };
                     
-                    oleDbDataReader.Close();
-                    oleDbConnection.Close();
+                    sqlDataReader.Close();
+                    sqlConnection.Close();
                 }
               
             }

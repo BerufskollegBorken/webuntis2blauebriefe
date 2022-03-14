@@ -150,7 +150,7 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
             exchangeService.UseDefaultCredentials = true;
             exchangeService.TraceEnabled = false;
             exchangeService.TraceFlags = TraceFlags.All;
-            exchangeService.Url = new Uri("https://ex01.bkb.local/EWS/Exchange.asmx");
+            exchangeService.Url = new Uri("https://outlook.office365.com/EWS/Exchange.asmx");
 
             EmailMessage message = new EmailMessage(exchangeService);
 

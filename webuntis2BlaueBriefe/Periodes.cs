@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.OleDb;
+using System.Data.SqlClient;
 
 namespace webuntis2BlaueBriefe
 {
@@ -8,7 +8,7 @@ namespace webuntis2BlaueBriefe
     {
         public Periodes()
         {
-            using (OleDbConnection oleDbConnection = new OleDbConnection(Global.ConnectionStringUntis))
+            using (SqlConnection sqlConnection = new SqlConnection(Global.ConnectionStringUntis))
             {
                 try
                 {
@@ -21,22 +21,19 @@ Terms.DateTo
 FROM Terms
 WHERE (((Terms.SCHOOLYEAR_ID)= " + Global.AktSjUntis + ")  AND ((Terms.SCHOOL_ID)=177659)) ORDER BY Terms.TERM_ID;";
 
-                    OleDbCommand oleDbCommand = new OleDbCommand(queryString, oleDbConnection);
-                    oleDbConnection.Open();
-                    OleDbDataReader oleDbDataReader = oleDbCommand.ExecuteReader();
+                    SqlCommand odbcCommand = new SqlCommand(queryString, sqlConnection);
+                    sqlConnection.Open();
+                    SqlDataReader sqlDataReader = odbcCommand.ExecuteReader();
 
-                    Console.WriteLine("Perioden");
-                    Console.WriteLine("--------");
-
-                    while (oleDbDataReader.Read())
+                    while (sqlDataReader.Read())
                     {
                         Periode periode = new Periode()
                         {
-                            IdUntis = oleDbDataReader.GetInt32(0),
-                            Name = Global.SafeGetString(oleDbDataReader, 1),
-                            Langname = Global.SafeGetString(oleDbDataReader, 2),
-                            Von = DateTime.ParseExact((oleDbDataReader.GetInt32(3)).ToString(), "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture),
-                            Bis = DateTime.ParseExact((oleDbDataReader.GetInt32(4)).ToString(), "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture)
+                            IdUntis = sqlDataReader.GetInt32(0),
+                            Name = Global.SafeGetString(sqlDataReader, 1),
+                            Langname = Global.SafeGetString(sqlDataReader, 2),
+                            Von = DateTime.ParseExact((sqlDataReader.GetInt32(3)).ToString(), "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture),
+                            Bis = DateTime.ParseExact((sqlDataReader.GetInt32(4)).ToString(), "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture)
                         };
 
                         if (DateTime.Now > periode.Von && DateTime.Now < periode.Bis)
@@ -55,7 +52,7 @@ WHERE (((Terms.SCHOOLYEAR_ID)= " + Global.AktSjUntis + ")  AND ((Terms.SCHOOL_ID
                         this[i].Bis = this[i + 1].Von.AddDays(-1);
                     }
 
-                    oleDbDataReader.Close();
+                    sqlDataReader.Close();
 
                     Console.WriteLine("");
 
@@ -77,7 +74,7 @@ WHERE (((Terms.SCHOOLYEAR_ID)= " + Global.AktSjUntis + ")  AND ((Terms.SCHOOL_ID
                 }
                 finally
                 {
-                    oleDbConnection.Close();
+                    sqlConnection.Close();
                 }
             }
         }

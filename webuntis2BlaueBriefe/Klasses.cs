@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.OleDb;
+using System.Data.SqlClient;
 using System.Linq;
 
 namespace webuntis2BlaueBriefe
@@ -13,7 +13,7 @@ namespace webuntis2BlaueBriefe
         {
             Lehrers = lehrers;
 
-            using (OleDbConnection oleDbConnection = new OleDbConnection(Global.ConnectionStringUntis))
+            using (SqlConnection sqlConnection = new SqlConnection(Global.ConnectionStringUntis))
             {
                 try
                 {
@@ -30,34 +30,34 @@ Class.TimeRequest,
 Class.ROOM_ID,
 Class.Text
 FROM (Class LEFT JOIN Department ON Class.DEPARTMENT_ID = Department.DEPARTMENT_ID) LEFT JOIN Teacher ON Class.TEACHER_ID = Teacher.TEACHER_ID
-WHERE (((Class.SCHOOL_ID)=177659) AND ((Class.TERM_ID)=" + periodes.Count + ") AND ((Class.Deleted)=False) AND ((Class.TERM_ID)=" + periodes.Count + ") AND ((Class.SCHOOLYEAR_ID)=" + Global.AktSjUntis + ") AND ((Department.SCHOOL_ID)=177659) AND ((Department.SCHOOLYEAR_ID)=" + Global.AktSjUntis + ") AND ((Teacher.SCHOOL_ID)=177659) AND ((Teacher.SCHOOLYEAR_ID)=" + Global.AktSjUntis + ") AND ((Teacher.TERM_ID)=" + periodes.Count + "))ORDER BY Class.Name ASC; ";
+WHERE (((Class.SCHOOL_ID)=177659) AND ((Class.TERM_ID)=" + periodes.Count + ") AND ((Class.Deleted)='false') AND ((Class.TERM_ID)=" + periodes.Count + ") AND ((Class.SCHOOLYEAR_ID)=" + Global.AktSjUntis + ") AND ((Department.SCHOOL_ID)=177659) AND ((Department.SCHOOLYEAR_ID)=" + Global.AktSjUntis + ") AND ((Teacher.SCHOOL_ID)=177659) AND ((Teacher.SCHOOLYEAR_ID)=" + Global.AktSjUntis + ") AND ((Teacher.TERM_ID)=" + periodes.Count + "))ORDER BY Class.Name ASC; ";
 
-                    OleDbCommand oleDbCommand = new OleDbCommand(queryString, oleDbConnection);
-                    oleDbConnection.Open();
-                    OleDbDataReader oleDbDataReader = oleDbCommand.ExecuteReader();
+                    SqlCommand odbcCommand = new SqlCommand(queryString, sqlConnection);
+                    sqlConnection.Open();
+                    SqlDataReader sqlDataReader = odbcCommand.ExecuteReader();
 
-                    while (oleDbDataReader.Read())
+                    while (sqlDataReader.Read())
                     {
                         List<Lehrer> klassenleitungen = new List<Lehrer>();
 
-                        foreach (var item in (Global.SafeGetString(oleDbDataReader, 2)).Split(','))
+                        foreach (var item in (Global.SafeGetString(sqlDataReader, 2)).Split(','))
                         {
                             klassenleitungen.Add((from l in lehrers
                                                   where l.IdUntis.ToString() == item
                                                   select l).FirstOrDefault());
                         }
 
-                        var klasseName = Global.SafeGetString(oleDbDataReader, 1);
+                        var klasseName = Global.SafeGetString(sqlDataReader, 1);
 
                         Klasse klasse = new Klasse()
                         {
-                            IdUntis = oleDbDataReader.GetInt32(0),
+                            IdUntis = sqlDataReader.GetInt32(0),
                             NameUntis = klasseName,
                             Klassenleitungen = klassenleitungen,
-                            Jahrgang = Global.SafeGetString(oleDbDataReader, 5),
-                            Bereichsleitung = Global.SafeGetString(oleDbDataReader, 7),
-                            Beschreibung = Global.SafeGetString(oleDbDataReader, 3),                            
-                            Url = "https://www.berufskolleg-borken.de/bildungsgange/" + Global.SafeGetString(oleDbDataReader, 10)
+                            Jahrgang = Global.SafeGetString(sqlDataReader, 5),
+                            Bereichsleitung = Global.SafeGetString(sqlDataReader, 7),
+                            Beschreibung = Global.SafeGetString(sqlDataReader, 3),                            
+                            Url = "https://www.berufskolleg-borken.de/bildungsgange/" + Global.SafeGetString(sqlDataReader, 10)
                         };
 
                         this.Add(klasse);
@@ -65,7 +65,7 @@ WHERE (((Class.SCHOOL_ID)=177659) AND ((Class.TERM_ID)=" + periodes.Count + ") A
 
                     Console.WriteLine(("Klassen " + ".".PadRight(this.Count / 150, '.')).PadRight(48, '.') + (" " + this.Count).ToString().PadLeft(4), '.');
 
-                    oleDbDataReader.Close();
+                    sqlDataReader.Close();
                 }
                 catch (Exception ex)
                 {
@@ -74,7 +74,7 @@ WHERE (((Class.SCHOOL_ID)=177659) AND ((Class.TERM_ID)=" + periodes.Count + ") A
                 }
                 finally
                 {
-                    oleDbConnection.Close();
+                    sqlConnection.Close();
                 }
             }
         }

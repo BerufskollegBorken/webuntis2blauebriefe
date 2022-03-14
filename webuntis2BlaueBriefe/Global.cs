@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.OleDb;
+using System.Data.SqlClient;
 
 namespace webuntis2BlaueBriefe
 {
@@ -54,7 +54,7 @@ namespace webuntis2BlaueBriefe
         { get { return "Mahnung gem. §50 (4) SchulG (Blauer Brief)"; } }
 
         public static string ConnectionStringAtlantis = @"Dsn=Atlantis9;uid=DBA";
-        public static string ConnectionStringUntis = @"Provider = Microsoft.Jet.OLEDB.4.0; Data Source=M:\\Data\\gpUntis.mdb;";
+        public static string ConnectionStringUntis = @"Data Source=SQL01\UNTIS;Initial Catalog=master;Integrated Security=True";
 
         public static string InputNotenCsv = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\MarksPerLesson.csv";
 
@@ -82,7 +82,7 @@ namespace webuntis2BlaueBriefe
             }
         }
         
-        public static string SafeGetString(OleDbDataReader reader, int colIndex)
+        public static string SafeGetString(SqlDataReader reader, int colIndex)
         {
             if (!reader.IsDBNull(colIndex))
                 return reader.GetString(colIndex);

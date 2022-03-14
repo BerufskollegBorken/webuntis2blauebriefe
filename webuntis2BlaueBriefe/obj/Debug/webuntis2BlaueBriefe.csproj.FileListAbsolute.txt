@@ -9,6 +9,7 @@ U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\Microsoft.Ex
 U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\Microsoft.Exchange.WebServices.xml
 U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\Microsoft.Exchange.WebServices.Auth.pdb
 U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\bin\Debug\Microsoft.Exchange.WebServices.Auth.xml
-U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Debug\webuntis2BlaueBriefe.csprojAssemblyReference.cache
 U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Debug\webuntis2BlaueBriefe.csproj.CoreCompileInputs.cache
 U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Debug\webuntis2BlaueBriefe.csproj.CopyComplete
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Debug\webuntis2BlaueBriefe.csproj.AssemblyReference.cache
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Debug\webuntis2BlaueBriefe.csproj.SuggestedBindingRedirects.cache

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.OleDb;
+using System.Data.SqlClient;
 
 namespace webuntis2BlaueBriefe
 {
@@ -12,7 +12,7 @@ namespace webuntis2BlaueBriefe
 
         public Lehrers(Periodes periodes)
         {
-            using (OleDbConnection oleDbConnection = new OleDbConnection(Global.ConnectionStringUntis))
+            using (SqlConnection sqlConnection = new SqlConnection(Global.ConnectionStringUntis))
             {
                 try
                 {
@@ -29,26 +29,26 @@ Teacher.Text2,
 Teacher.Text3,
 Teacher.PlannedWeek
 FROM Teacher 
-WHERE (((SCHOOLYEAR_ID)= " + Global.AktSjUntis + ") AND  ((TERM_ID)=" + periodes.Count + ") AND ((Teacher.SCHOOL_ID)=177659) AND (((Teacher.Deleted)=No))) ORDER BY Teacher.Name;";
+WHERE (((SCHOOLYEAR_ID)= " + Global.AktSjUntis + ") AND  ((TERM_ID)=" + periodes.Count + ") AND ((Teacher.SCHOOL_ID)=177659) AND (((Teacher.Deleted)='false'))) ORDER BY Teacher.Name;";
 
-                    OleDbCommand oleDbCommand = new OleDbCommand(queryString, oleDbConnection);
-                    oleDbConnection.Open();
-                    OleDbDataReader oleDbDataReader = oleDbCommand.ExecuteReader();
+                    SqlCommand odbcCommand = new SqlCommand(queryString, sqlConnection);
+                    sqlConnection.Open();
+                    SqlDataReader sqlDataReader = odbcCommand.ExecuteReader();
 
-                    while (oleDbDataReader.Read())
+                    while (sqlDataReader.Read())
                     {
                         Lehrer lehrer = new Lehrer()
                         {
-                            IdUntis = oleDbDataReader.GetInt32(0),
-                            Kürzel = Global.SafeGetString(oleDbDataReader, 1),
-                            Nachname = Global.SafeGetString(oleDbDataReader, 2),
-                            Vorname = Global.SafeGetString(oleDbDataReader, 3),
-                            Mail = Global.SafeGetString(oleDbDataReader, 4),
-                            Anrede = Global.SafeGetString(oleDbDataReader, 5) == "n" ? "Herr" : Global.SafeGetString(oleDbDataReader, 5) == "W" ? "Frau" : "",
-                            Titel = Global.SafeGetString(oleDbDataReader, 6),
+                            IdUntis = sqlDataReader.GetInt32(0),
+                            Kürzel = Global.SafeGetString(sqlDataReader, 1),
+                            Nachname = Global.SafeGetString(sqlDataReader, 2),
+                            Vorname = Global.SafeGetString(sqlDataReader, 3),
+                            Mail = Global.SafeGetString(sqlDataReader, 4),
+                            Anrede = Global.SafeGetString(sqlDataReader, 5) == "n" ? "Herr" : Global.SafeGetString(sqlDataReader, 5) == "W" ? "Frau" : "",
+                            Titel = Global.SafeGetString(sqlDataReader, 6),
                             Raum = "",
-                            Funktion = Global.SafeGetString(oleDbDataReader, 8),
-                            Dienstgrad = Global.SafeGetString(oleDbDataReader, 9)
+                            Funktion = Global.SafeGetString(sqlDataReader, 8),
+                            Dienstgrad = Global.SafeGetString(sqlDataReader, 9)
                         };
 
                         if (!lehrer.Mail.EndsWith("@berufskolleg-borken.de") && lehrer.Kürzel != "LAT" && lehrer.Kürzel != "?")
@@ -61,7 +61,7 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSjUntis + ") AND  ((TERM_ID)=" + periodes
 
                     Console.WriteLine(("Lehrer " + ".".PadRight(this.Count / 150, '.')).PadRight(48, '.') + (" " + this.Count).ToString().PadLeft(4), '.');
 
-                    oleDbDataReader.Close();
+                    sqlDataReader.Close();
                 }
                 catch (Exception ex)
                 {
@@ -69,7 +69,7 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSjUntis + ") AND  ((TERM_ID)=" + periodes
                 }
                 finally
                 {
-                    oleDbConnection.Close();
+                    sqlConnection.Close();
                 }
             }
         }

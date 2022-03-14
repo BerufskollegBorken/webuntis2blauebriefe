@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.OleDb;
+using System.Data.SqlClient;
 
 namespace webuntis2BlaueBriefe
 {
@@ -12,7 +12,7 @@ namespace webuntis2BlaueBriefe
 
         public Fachs(string connectionStringUntis)
         {
-            using (OleDbConnection oleDbConnection = new OleDbConnection(connectionStringUntis))
+            using (SqlConnection sqlConnection = new SqlConnection(Global.ConnectionStringUntis))
             {
                 try
                 {
@@ -22,25 +22,25 @@ namespace webuntis2BlaueBriefe
                                             Subjects.Longname,
                                             Subjects.Text
                                             FROM Subjects 
-                                            WHERE Schoolyear_id = " + Global.AktSjUntis + " AND Deleted=No ORDER BY Name;";
+                                            WHERE Schoolyear_id = " + Global.AktSjUntis + " AND (Deleted='false') ORDER BY Name;";
 
-                    OleDbCommand oleDbCommand = new OleDbCommand(queryString, oleDbConnection);
-                    oleDbConnection.Open();
-                    OleDbDataReader oleDbDataReader = oleDbCommand.ExecuteReader();
+                    SqlCommand odbcCommand = new SqlCommand(queryString, sqlConnection);
+                    sqlConnection.Open();
+                    SqlDataReader sqlDataReader = odbcCommand.ExecuteReader();
 
-                    while (oleDbDataReader.Read())
+                    while (sqlDataReader.Read())
                     {
                         Fach fach = new Fach()
                         {
-                            IdUntis = oleDbDataReader.GetInt32(0),
-                            KürzelUntis = SafeGetString(oleDbDataReader, 1).ToString(),
-                            LangnameUntis = SafeGetString(oleDbDataReader, 2).ToString(),
-                            BezeichnungImZeugnis = SafeGetString(oleDbDataReader, 3).ToString()                            
+                            IdUntis = sqlDataReader.GetInt32(0),
+                            KürzelUntis = SafeGetString(sqlDataReader, 1).ToString(),
+                            LangnameUntis = SafeGetString(sqlDataReader, 2).ToString(),
+                            BezeichnungImZeugnis = SafeGetString(sqlDataReader, 3).ToString()                            
                         };
                         this.Add(fach);
                     };
 
-                    oleDbDataReader.Close();
+                    sqlDataReader.Close();
                 }
                 catch (Exception ex)
                 {
@@ -49,12 +49,12 @@ namespace webuntis2BlaueBriefe
                 }
                 finally
                 {
-                    oleDbConnection.Close();
+                    sqlConnection.Close();
                 }
             }
         }
                 
-        private object SafeGetString(OleDbDataReader reader, int colIndex)
+        private object SafeGetString(SqlDataReader reader, int colIndex)
         {
             if (!reader.IsDBNull(colIndex))
                 return (String)reader.GetString(colIndex);

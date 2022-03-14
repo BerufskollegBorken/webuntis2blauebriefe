@@ -504,18 +504,15 @@ Leistung";
                             if (d.Prüfungsart.Contains("laue"))
                             {
                                 noteJetzt = d.BlauerBriefNote;
-                            }
-                            if (d.Prüfungsart.Contains("albjahres"))
-                            {
-                                noteHalbjahr = d.BlauerBriefNote;
-                            }
+                                noteHalbjahr = d.Halbjahresgesamtnote;
+                            }                            
                         }
                     }
                 }
                 
                 if (noteJetzt != null)
                 {
-                    this.Fachs.Add(new Fach(dFach, (from f in fachs where f.KürzelUntis == dFach select f.BezeichnungImZeugnis).FirstOrDefault(), noteJetzt,noteHalbjahr));
+                    this.Fachs.Add(new Fach(dFach, (from f in fachs where f.KürzelUntis == dFach select f.BezeichnungImZeugnis).FirstOrDefault(), noteJetzt, noteHalbjahr));
                 }
             }
         }

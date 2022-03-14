@@ -17,7 +17,7 @@ namespace webuntis2BlaueBriefe
             {
                 Global.Zeilen = new List<string>() { "AnDieErziehungsberechtigtenVon; anrede; anredeLerncoaching; vorname; nachname; dichSie; plz; straße; ort; klasse; heute; betreff; absatz1; fächer; absatz2; absatz3; klassenleitung; klassenlehrerIn; hinweis"};
 
-                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2020 | Version 202000322");
+                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2022 | Version 20220314");
                 Console.WriteLine("====================================================================================================");
                 Console.WriteLine("");
 
@@ -33,7 +33,7 @@ namespace webuntis2BlaueBriefe
                 
                 schuelerMitDefiziten.RenderBriefeUndSteuerdatei(steuerdatei);
 
-                schuelerMitDefiziten.MailAnKlassenlehrer();
+                //schuelerMitDefiziten.MailAnKlassenlehrer();
                 Console.WriteLine("Verarbeitung beendet. ENTER");
                 Console.ReadKey();
             }
@@ -76,13 +76,13 @@ namespace webuntis2BlaueBriefe
         private static void RenderNotenexportCsv(string inputNotenCsv)
         {
             Console.WriteLine("Die Datei " + inputNotenCsv + " existiert nicht.");
-            Console.WriteLine("Exportieren Sie die Datei aus dem Digitalen Klassenbuch, indem Sie");
+            Console.WriteLine("Exportieren Sie die Datei aus dem Digitalen Klassenbuch, indem Sie als Administrator");
             Console.WriteLine(" 1. Klassenbuch > Berichte klicken");
             Console.WriteLine(" 2. Alle Klassen auswählen");
-            Console.WriteLine(" 3. Unter \"Noten\" die Prüfungsart alle Prüfungsarten auswählen");
-            Console.WriteLine(" 4. Hinter \"Noten pro Schüler\" auf CSV klicken.");
-            Console.WriteLine(" 5. Die Datei \"MarksPerLesson.csv\" auf dem Desktop speichern.");
-            Console.WriteLine("ENTER beendet das Programm.");
+            Console.WriteLine(" 3. Unter \"Noten\" die Prüfungsart \"Alle\" auswählen.");
+            Console.WriteLine(" 4. Hinter \"Noten pro Schüler\" auf CSV klicken");
+            Console.WriteLine(" 5. Die Datei \"MarksPerLesson.csv\" auf dem Desktop speichern");
+            Console.WriteLine("ENTER beendet das Programm");
             Console.ReadKey();
             Environment.Exit(0);
         }
