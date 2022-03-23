@@ -17,7 +17,7 @@ namespace webuntis2BlaueBriefe
             {
                 Global.Zeilen = new List<string>() { "AnDieErziehungsberechtigtenVon; anrede; anredeLerncoaching; vorname; nachname; dichSie; plz; straße; ort; klasse; heute; betreff; absatz1; fächer; absatz2; absatz3; klassenleitung; klassenlehrerIn; hinweis"};
 
-                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2022 | Version 20220314");
+                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2022 | Version 20220322");
                 Console.WriteLine("====================================================================================================");
                 Console.WriteLine("");
 
@@ -27,13 +27,14 @@ namespace webuntis2BlaueBriefe
                 Stundentafels stundentafels = new Stundentafels(fachs);
                 Periodes periodes = new Periodes();
                 Lehrers lehrers = new Lehrers(periodes);
-                Klasses klasses = new Klasses(lehrers, periodes);                
-                DefizitäreLeistungen defizitäreLeistungen = new DefizitäreLeistungen(fachs,stundentafels);
+                Klasses klasses = new Klasses(lehrers, periodes, stundentafels);                
+                DefizitäreLeistungen defizitäreLeistungen = new DefizitäreLeistungen(fachs, klasses);
                 Schuelers schuelerMitDefiziten = new Schuelers(defizitäreLeistungen, klasses, lehrers, fachs);
-                
+
                 schuelerMitDefiziten.RenderBriefeUndSteuerdatei(steuerdatei);
 
                 //schuelerMitDefiziten.MailAnKlassenlehrer();
+
                 Console.WriteLine("Verarbeitung beendet. ENTER");
                 Console.ReadKey();
             }

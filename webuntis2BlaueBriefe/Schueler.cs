@@ -47,16 +47,18 @@ namespace webuntis2BlaueBriefe
         public string Protokoll { get; private set; }
         public List<string> Dateien { get; set; }
 
-        internal void RenderMitteilung(string art)
+        internal void RenderMitteilung(string art, string footer)
         {
             if (art == "G")
             {
                 Console.Write("Gefährdung ...");
+                footer += "Gefährdung ...";
                 Protokoll += "<td>" + RenderGefährdungNeu() + " </td>";
             }
             else
             {
                 Console.Write("Mitteilung über den Leistungsstand ...");
+                footer += "Mitteilung über den Leistungsstand ...";
                 Protokoll += "<td>Mitteilung über den Leistungsstand</td>";
             }
 
@@ -163,6 +165,7 @@ namespace webuntis2BlaueBriefe
 
                 FindAndReplace(wordApp, "<hinweis>", GetHinweis());
                 zeile += GetHinweis() + ";";
+                FindAndReplace(wordApp, "<footer>", footer);
                 aDoc.Save();
                 aDoc.Close();            
                 System.Runtime.InteropServices.Marshal.ReleaseComObject(aDoc);
@@ -234,10 +237,10 @@ namespace webuntis2BlaueBriefe
                 return "Sie werden darüber unterrichtet, dass Ihre Leistung" + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "en" : "") + " in " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "den Fächern" : "dem Fach");
             }
         }
-
         internal void RenderBrief()
         {
-            Console.Write(Nachname + (Volljaehrig ? "(vollj.)" : "") + "; HZ: " + RenderNotenHz() + "; Jetzt: " + RenderNotenJetzt() + "; ");
+            string footer = Nachname + "(" + Klasse + ") " + (Volljaehrig ? "(vollj.)" : "") + "; HZ: " + RenderNotenHz() + "; Jetzt: " + RenderNotenJetzt() + "; ";
+            Console.Write(footer);
             
             Protokoll = "<td>" + Nachname + ", " + Vorname + "</td><td>" + (Volljaehrig ? "J" : "N") + "</td><td>" + RenderNotenHz() + "</td><td>" + RenderNotenJetzt() + "</td>";
 
@@ -259,7 +262,7 @@ namespace webuntis2BlaueBriefe
                              where Global.Ungenügend.Contains(f.NoteJetzt)
                              select f).Count() == 0)
                         {
-                            RenderMitteilung("M");
+                            RenderMitteilung("M", footer);
                         }
                     }
 
@@ -273,7 +276,7 @@ namespace webuntis2BlaueBriefe
                              where Global.Ungenügend.Contains(f.NoteJetzt)
                              select f).Count() == 0)
                         {
-                            RenderMitteilung("G");
+                            RenderMitteilung("G", footer);
                         }
                     }
 
@@ -283,7 +286,7 @@ namespace webuntis2BlaueBriefe
                          where Global.Ungenügend.Contains(f.NoteJetzt)
                          select f).Count() > 0)
                     {
-                        RenderMitteilung("G");
+                        RenderMitteilung("G", footer);
                     }
                 }   
             }
@@ -308,7 +311,7 @@ namespace webuntis2BlaueBriefe
                                                   where Global.Mangelhaft.Contains(f.NoteHalbjahr)
                                                   select f).Count())
                         {
-                            RenderMitteilung("G");
+                            RenderMitteilung("G", footer);
                         }
                     }
                 }
@@ -321,7 +324,7 @@ namespace webuntis2BlaueBriefe
                                           where Global.Ungenügend.Contains(f.NoteHalbjahr)
                                           select f).Count())
                 {
-                    RenderMitteilung("G");                    
+                    RenderMitteilung("G", footer);                    
                 }
             }
 
@@ -338,7 +341,7 @@ namespace webuntis2BlaueBriefe
                                           where Global.Mangelhaft.Contains(f.NoteHalbjahr)
                                           select f).Count())
                 {
-                    RenderMitteilung("G");             
+                    RenderMitteilung("G", footer);             
                 }
 
                 //Abschlussklasse erhalten keine Benachrichtigung

@@ -20,20 +20,22 @@ namespace webuntis2BlaueBriefe
         public bool ReligionAbgewählt { get; internal set; }
         public string Halbjahresgesamtnote { get; internal set; }
 
-        internal bool IstKeinDiff(Stundentafels stundentafels)
+        internal bool IstKeinDiff(Klasses klasses)
         {
-            if ((from s in stundentafels
-                 from f in s.Fachs
-                 where f.KürzelUntis == Fach.KürzelUntis || (Klasse.StartsWith("HH") && Fach.KürzelUntis == "BI")
-                 where Klasse.StartsWith(s.Name)
-                 select f).Any())
+            foreach (var klasse in klasses)
             {
-                return true;
+                if (klasse.NameUntis == this.Klasse)
+                {
+                    foreach (var fach in klasse.Stundentafel.Fachs)
+                    {
+                        if (fach.BezeichnungImZeugnis == this.Name)
+                        {
+                            return false;
+                        }
+                    }
+                }
             }
-            else
-            {
-                return false;
-            }            
+            return true;
         }
     }
 }

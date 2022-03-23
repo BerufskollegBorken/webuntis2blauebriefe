@@ -1,11 +1,14 @@
 ﻿using Microsoft.Exchange.WebServices.Data;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.Odbc;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Text;
 
 namespace webuntis2BlaueBriefe
@@ -145,53 +148,85 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
 
         private void Mail(List<Schueler> schülerDieserKlasse)
         {
-            ExchangeService exchangeService = new ExchangeService();
-
-            exchangeService.UseDefaultCredentials = true;
-            exchangeService.TraceEnabled = false;
-            exchangeService.TraceFlags = TraceFlags.All;
-            exchangeService.Url = new Uri("https://outlook.office365.com/EWS/Exchange.asmx");
-
-            EmailMessage message = new EmailMessage(exchangeService);
-
-            message.ToRecipients.Add("stefan.baeumer@berufskolleg-borken.de");
-
-            foreach (var s in schülerDieserKlasse)
+            MailMessage message = new MailMessage("stefan.baeumer@berufskolleg-borken.de", "stefan.baeumer@berufskolleg-borken.de");
+            var ss = Console.ReadLine();
+            
+            String password = ss;
+                        
+            try
             {
-                foreach (var datei in s.Dateien)
+                String userName = "stefan.baeumer@berufskolleg-borken.de";                
+                MailMessage msg = new MailMessage();
+                msg.To.Add(new MailAddress("stefan.baeumer@berufskolleg-borken.de"));
+                msg.From = new MailAddress(userName);
+                msg.Subject = "Test Office 365 Account";
+                msg.Body = "Testing email using Office 365 account.";
+                msg.IsBodyHtml = true;
+
+                using (SmtpClient client = new SmtpClient
                 {
-                    message.Attachments.AddFileAttachment(datei);
+                    Host = "smtp.office365.com",
+                    Credentials = new System.Net.NetworkCredential(userName, password),
+                    Port = 587,
+                    EnableSsl = true,
+                })
+                {
+                    client.Send(msg);
                 }
             }
-                 
-            message.Subject = "Blaue Briefe - BITTE KONTROLLIEREN";
-
-            message.Body = @"Guten Tag " + schülerDieserKlasse[0].Klassenleitung + "," +
-                "<br><br>Sie erhalten diese Mail in Ihrer Eigenschaft als Klassenleitung der Klasse " + schülerDieserKlasse[0].Klasse + "." +
-                "<br><br>" +
-                "Bitte prüfen Sie die im Folgenden automatisch erstellten und aufgelisteten Blauen Briefe gewissenhaft. Die Verantwortung für die Richtigkeit liegt ganz allein bei Ihnen. Achten Sie beispielsweise darauf, dass kein Fach des Differenzierungsbereichs angemahnt wird.</br>" +
-                "<br><table border = 1><tr><td>Name</td><td>Vollj.</td><td>Halbjahreszeugnis</td><td>Aktueller Notenstand<br> aller abweichenden <br>Fächer</td><td>Gefährdung / Mitteilung Leistungsstand</td><td>Anschrift(en)</td></tr>";
-
-            foreach (var s in schülerDieserKlasse)
+            catch (Exception ex)
             {
-                message.Body += "<tr>" + s.Protokoll + "</tr>";
+                Console.Write(ex.Message);
+                Console.ReadKey();
             }
 
-            message.Body += "</table></br>" +
-                "Wenn Sie sich nicht zeitnah zurückmelden, bestätigen damit die Richtigkeit. Die Briefe werden dann alsbald verschickt." +
-                "</br></br>" +
-                "Stefan Bäumer" +
-                "";
+            ExchangeService exchangeService = new ExchangeService(ExchangeVersion.Exchange2010_SP1);
 
-            message.Save(WellKnownFolderName.Drafts);
-            //message.SendAndSaveCopy();
+            //exchangeService.UseDefaultCredentials = true;
+            //exchangeService.TraceEnabled = false;
+            //exchangeService.TraceFlags = TraceFlags.All;
+            //exchangeService.Url = new Uri("https://outlook.office365.com/EWS/Exchange.asmx");
+
+            //EmailMessage message = new EmailMessage(exchangeService);
+
+            //message.ToRecipients.Add("stefan.baeumer@berufskolleg-borken.de");
+
+            //foreach (var s in schülerDieserKlasse)
+            //{
+            //    foreach (var datei in s.Dateien)
+            //    {
+            //        message.Attachments.AddFileAttachment(datei);
+            //    }
+            //}
+                 
+            //message.Subject = "Blaue Briefe - BITTE KONTROLLIEREN";
+
+            //message.Body = @"Guten Tag " + schülerDieserKlasse[0].Klassenleitung + "," +
+            //    "<br><br>Sie erhalten diese Mail in Ihrer Eigenschaft als Klassenleitung der Klasse " + schülerDieserKlasse[0].Klasse + "." +
+            //    "<br><br>" +
+            //    "Bitte prüfen Sie die im Folgenden automatisch erstellten und aufgelisteten Blauen Briefe gewissenhaft. Die Verantwortung für die Richtigkeit liegt ganz allein bei Ihnen. Achten Sie beispielsweise darauf, dass kein Fach des Differenzierungsbereichs angemahnt wird.</br>" +
+            //    "<br><table border = 1><tr><td>Name</td><td>Vollj.</td><td>Halbjahreszeugnis</td><td>Aktueller Notenstand<br> aller abweichenden <br>Fächer</td><td>Gefährdung / Mitteilung Leistungsstand</td><td>Anschrift(en)</td></tr>";
+
+            //foreach (var s in schülerDieserKlasse)
+            //{
+            //    message.Body += "<tr>" + s.Protokoll + "</tr>";
+            //}
+
+            //message.Body += "</table></br>" +
+            //    "Wenn Sie sich nicht zeitnah zurückmelden, bestätigen damit die Richtigkeit. Die Briefe werden dann alsbald verschickt." +
+            //    "</br></br>" +
+            //    "Stefan Bäumer" +
+            //    "";
+
+            //message.Save(WellKnownFolderName.Drafts);
+            ////message.SendAndSaveCopy();
             
-            Console.WriteLine(schülerDieserKlasse[0].Klasse + " " + schülerDieserKlasse[0].Klassenleitung  + ": Mail gesendet.");
+            //Console.WriteLine(schülerDieserKlasse[0].Klasse + " " + schülerDieserKlasse[0].Klassenleitung  + ": Mail gesendet.");
         }
 
         internal void RenderBriefeUndSteuerdatei(string steuerdatei)
         {
-            Console.WriteLine(this[0].Klasse + "\n" + "=".PadRight(this[0].Klasse.Length - 1, '='));
+            //Console.WriteLine(this[0].Klasse + "\n" + "=".PadRight(this[0].Klasse.Length - 1, '='));
 
             foreach (var schueler in this)
             {

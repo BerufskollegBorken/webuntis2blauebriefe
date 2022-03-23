@@ -13,6 +13,6 @@ namespace webuntis2BlaueBriefe
         public string Url { get; internal set; }
         public string Jahrgang { get; internal set; }
         public DateTime ErsterSchultag { get; internal set; }
-
+        public Stundentafel Stundentafel { get; internal set; }
     }
 }

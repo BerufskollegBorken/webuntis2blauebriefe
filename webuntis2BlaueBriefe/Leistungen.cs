@@ -11,7 +11,7 @@ namespace webuntis2BlaueBriefe
 {
     public class DefizitäreLeistungen : List<Leistung>
     {
-        public DefizitäreLeistungen(Fachs fachs, Stundentafels stundentafels)
+        public DefizitäreLeistungen(Fachs fachs, Klasses klasses)
         {
             using (StreamReader reader = new StreamReader(Global.InputNotenCsv))
             {
@@ -87,13 +87,13 @@ namespace webuntis2BlaueBriefe
                             {
                                 if (leistung.Prüfungsart == Global.BlaueBriefe)
                                 {
-                                    if (leistung.IstKeinDiff(stundentafels))
+                                    if (leistung.IstKeinDiff(klasses))
                                     {
                                         this.Add(leistung);
                                     }
                                     else
                                     {
-                                        Console.WriteLine("ACHTUNG: Mahnung im Diff-Bereich." + leistung.Klasse + " " + leistung.Fach);
+                                        Console.WriteLine("ACHTUNG: Mahnung im Diff-Bereich. " + leistung.Klasse + ": " + leistung.Fach.BezeichnungImZeugnis + " [ENTER]");
                                         Console.ReadKey();
                                     }                               
                                 }                               
