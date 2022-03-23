@@ -83,7 +83,7 @@ namespace webuntis2BlaueBriefe
 
                 var origFileName = "Blaue Briefe.docx";
                 
-                var fileName = folder + "\\" + DateTime.Now.ToString("yyyyMMdd") + "-" + Klasse + "-" + Nachname + "-" + Vorname + (x > 1 ? strasse : "") + (art == "G" ? "-Gefährdung.docx" : "-Mitteilung.docx");
+                var fileName = folder + "\\" + (Volljaehrig?"V-":"M-") + DateTime.Now.ToString("yyyyMMdd") + "-" + Klasse + "-" + Nachname + "-" + Vorname + (x > 1 ? strasse : "") + (art == "G" ? "-Gefährdung.docx" : "-Mitteilung.docx");
 
                 Dateien.Add(fileName);
 
@@ -138,11 +138,11 @@ namespace webuntis2BlaueBriefe
                 }
                 else
                 {
-                    FindAndReplace(wordApp, "<plz>", Plz);
+                    FindAndReplace(wordApp, "<plz>", "");
                     zeile += Plz + ";";
-                    FindAndReplace(wordApp, "<straße>", Strasse);
+                    FindAndReplace(wordApp, "<straße>", "!!! Kein Briefversand bei Volljährigen !!!");
                     zeile += Strasse + ";";
-                    FindAndReplace(wordApp, "<ort>", Ort);
+                    FindAndReplace(wordApp, "<ort>", "");
                     zeile += Ort + ";";
                     Protokoll += Strasse + " " + Plz + " " + Ort + " ";
                 }
@@ -247,7 +247,7 @@ namespace webuntis2BlaueBriefe
         }
         internal void RenderBrief(string folder)
         {
-            string footer = Nachname + "(" + Klasse + ") " + (Volljaehrig ? "(vollj.)" : "") + "; HZ: " + RenderNotenHz() + "; Jetzt: " + RenderNotenJetzt() + "; ";
+            string footer = (Volljaehrig ? "Vollj.;" : "Minderj.;" ) + Klasse + " HZ: " + RenderNotenHz() + "; Jetzt: " + RenderNotenJetzt() + "; ";
             Console.Write(footer, folder);
             
             Protokoll = "<td>" + Nachname + ", " + Vorname + "</td><td>" + (Volljaehrig ? "J" : "N") + "</td><td>" + RenderNotenHz() + "</td><td>" + RenderNotenJetzt() + "</td>";
@@ -341,17 +341,26 @@ namespace webuntis2BlaueBriefe
             if ((from f in Fachs where Global.Ungenügend.Contains(f.NoteHalbjahr) select f).Count() >= 1 ||
                 (from f in Fachs where Global.Mangelhaft.Contains(f.NoteHalbjahr) select f).Count() > 1)
             {
-                if ((from f in Fachs
-                     where Global.Ungenügend.Contains(f.NoteJetzt)
-                     where Global.Mangelhaft.Contains(f.NoteJetzt)
-                     select f).Count() > (from f in Fachs
-                                          where Global.Ungenügend.Contains(f.NoteHalbjahr)
-                                          where Global.Mangelhaft.Contains(f.NoteHalbjahr)
-                                          select f).Count())
+                var anzahlHzDefizite5 = (from f in Fachs
+                                        where Global.Mangelhaft.Contains(f.NoteHalbjahr)
+                                        select f).Count();
+
+                var anzahlJetztDefizite5 = (from f in Fachs
+                                           where Global.Mangelhaft.Contains(f.NoteJetzt)
+                                           select f).Count();
+
+                var anzahlHzDefizite6 = (from f in Fachs
+                                        where Global.Ungenügend.Contains(f.NoteHalbjahr) 
+                                        select f).Count();
+
+                var anzahlJetztDefizite6 = (from f in Fachs
+                                           where Global.Ungenügend.Contains(f.NoteJetzt) 
+                                           select f).Count();
+
+                if (anzahlJetztDefizite5 > anzahlHzDefizite5 || anzahlJetztDefizite6 > anzahlHzDefizite6)
                 {
                     RenderMitteilung("G", footer, folder);             
                 }
-
                 //Abschlussklasse erhalten keine Benachrichtigung
             }
             Console.WriteLine("ok");
