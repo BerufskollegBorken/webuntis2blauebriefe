@@ -47,8 +47,10 @@ namespace webuntis2BlaueBriefe
         public string Protokoll { get; private set; }
         public List<string> Dateien { get; set; }
 
-        internal void RenderMitteilung(string art, string footer)
+        internal void RenderMitteilung(string art, string footer, string folder)
         {
+            System.IO.Directory.CreateDirectory(folder);
+
             if (art == "G")
             {
                 Console.Write("Gefährdung ...");
@@ -81,7 +83,7 @@ namespace webuntis2BlaueBriefe
 
                 var origFileName = "Blaue Briefe.docx";
                 
-                var fileName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + DateTime.Now.ToString("yyyyMMdd") + "-" + Nachname + "-" + Vorname + (x > 1 ? strasse : "") + (art == "G" ? "-Gefährdung-Der-Versetzung.docx" : "-Mitteilung-Leistungsstand.docx");
+                var fileName = folder + "\\" + DateTime.Now.ToString("yyyyMMdd") + "-" + Klasse + "-" + Nachname + "-" + Vorname + (x > 1 ? strasse : "") + (art == "G" ? "-Gefährdung.docx" : "-Mitteilung.docx");
 
                 Dateien.Add(fileName);
 
@@ -92,9 +94,11 @@ namespace webuntis2BlaueBriefe
 
                 System.IO.File.Copy(origFileName.ToString(), fileName.ToString());
 
+                object oMissing = System.Reflection.Missing.Value;
+
                 Application wordApp = new Application { Visible = true };
-                Document aDoc = wordApp.Documents.Open(fileName, ReadOnly: false, Visible: true);
-                aDoc.Activate();
+                Document doc = wordApp.Documents.Open(fileName, ReadOnly: false, Visible: true);
+                doc.Activate();
 
                 Protokoll += "<td>";
 
@@ -166,10 +170,14 @@ namespace webuntis2BlaueBriefe
                 FindAndReplace(wordApp, "<hinweis>", GetHinweis());
                 zeile += GetHinweis() + ";";
                 FindAndReplace(wordApp, "<footer>", footer);
-                aDoc.Save();
-                aDoc.Close();            
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(aDoc);
-                aDoc = null;
+                
+                doc.ExportAsFixedFormat(fileName+".pdf", WdExportFormat.wdExportFormatPDF, false, WdExportOptimizeFor.wdExportOptimizeForOnScreen,
+                    WdExportRange.wdExportAllDocument, 1, 1, WdExportItem.wdExportDocumentContent, true, true,
+                    WdExportCreateBookmarks.wdExportCreateHeadingBookmarks, true, true, false, ref oMissing);
+                doc.Save();                             
+                doc.Close();            
+                System.Runtime.InteropServices.Marshal.ReleaseComObject(doc);
+                doc = null;
                 GC.Collect();
                 wordApp.Quit();
                 Global.Zeilen.Add(zeile);
@@ -237,10 +245,10 @@ namespace webuntis2BlaueBriefe
                 return "Sie werden darüber unterrichtet, dass Ihre Leistung" + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "en" : "") + " in " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "den Fächern" : "dem Fach");
             }
         }
-        internal void RenderBrief()
+        internal void RenderBrief(string folder)
         {
             string footer = Nachname + "(" + Klasse + ") " + (Volljaehrig ? "(vollj.)" : "") + "; HZ: " + RenderNotenHz() + "; Jetzt: " + RenderNotenJetzt() + "; ";
-            Console.Write(footer);
+            Console.Write(footer, folder);
             
             Protokoll = "<td>" + Nachname + ", " + Vorname + "</td><td>" + (Volljaehrig ? "J" : "N") + "</td><td>" + RenderNotenHz() + "</td><td>" + RenderNotenJetzt() + "</td>";
 
@@ -262,7 +270,7 @@ namespace webuntis2BlaueBriefe
                              where Global.Ungenügend.Contains(f.NoteJetzt)
                              select f).Count() == 0)
                         {
-                            RenderMitteilung("M", footer);
+                            RenderMitteilung("M", footer, folder);
                         }
                     }
 
@@ -276,7 +284,7 @@ namespace webuntis2BlaueBriefe
                              where Global.Ungenügend.Contains(f.NoteJetzt)
                              select f).Count() == 0)
                         {
-                            RenderMitteilung("G", footer);
+                            RenderMitteilung("G", footer, folder);
                         }
                     }
 
@@ -286,7 +294,7 @@ namespace webuntis2BlaueBriefe
                          where Global.Ungenügend.Contains(f.NoteJetzt)
                          select f).Count() > 0)
                     {
-                        RenderMitteilung("G", footer);
+                        RenderMitteilung("G", footer, folder);
                     }
                 }   
             }
@@ -311,7 +319,7 @@ namespace webuntis2BlaueBriefe
                                                   where Global.Mangelhaft.Contains(f.NoteHalbjahr)
                                                   select f).Count())
                         {
-                            RenderMitteilung("G", footer);
+                            RenderMitteilung("G", footer, folder);
                         }
                     }
                 }
@@ -324,7 +332,7 @@ namespace webuntis2BlaueBriefe
                                           where Global.Ungenügend.Contains(f.NoteHalbjahr)
                                           select f).Count())
                 {
-                    RenderMitteilung("G", footer);                    
+                    RenderMitteilung("G", footer, folder);                    
                 }
             }
 
@@ -341,7 +349,7 @@ namespace webuntis2BlaueBriefe
                                           where Global.Mangelhaft.Contains(f.NoteHalbjahr)
                                           select f).Count())
                 {
-                    RenderMitteilung("G", footer);             
+                    RenderMitteilung("G", footer, folder);             
                 }
 
                 //Abschlussklasse erhalten keine Benachrichtigung

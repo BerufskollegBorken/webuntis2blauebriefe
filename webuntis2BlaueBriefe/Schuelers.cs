@@ -226,11 +226,13 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
 
         internal void RenderBriefeUndSteuerdatei(string steuerdatei)
         {
+            var folder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\BlaueBriefe-" + DateTime.Now.ToString("yyyyMMdd-hhmm");
+
             //Console.WriteLine(this[0].Klasse + "\n" + "=".PadRight(this[0].Klasse.Length - 1, '='));
 
             foreach (var schueler in this)
             {
-                schueler.RenderBrief();
+                schueler.RenderBrief(folder);
             }
 
             using (StreamWriter writer = new StreamWriter(steuerdatei , true, Encoding.Default))
@@ -261,7 +263,7 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
             }
         }
 
-        internal void RenderSteuerdatei()
+        internal void RenderSteuerdatei(string folder)
         {
             Console.WriteLine(this[0].Klasse + "\n" + "=".PadRight(this[0].Klasse.Length - 1, '='));
 
@@ -269,7 +271,7 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
 
             foreach (var schueler in this)
             {
-                schueler.RenderBrief();
+                schueler.RenderBrief(folder);
             }
         }
 
