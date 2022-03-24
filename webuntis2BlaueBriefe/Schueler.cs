@@ -212,7 +212,7 @@ namespace webuntis2BlaueBriefe
 
         private object GetAbsatz3()
         {
-            return "Wir laden Sie zu einem Beratungsgespräch ein. Stimmen Sie bitte den Gesprächstermin mit " + (KlassenleitungMw == "Herr" ? "dem Klassenlehrer " : "der Klassenlehrerin") + " " + Klassenleitung + " (" + KlassenleitungMail + ") ab.";
+            return "Wir laden Sie zu einem Beratungsgespräch ein. Stimmen Sie bitte den Gesprächster- min mit " + (KlassenleitungMw == "Herr" ? "dem Klassenlehrer" : "der Klassenlehrerin") + " " + Klassenleitung + " (" + KlassenleitungMail + ") ab.";
         }
 
         private object GetAbsatz2(string art)
