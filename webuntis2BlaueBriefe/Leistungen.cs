@@ -28,11 +28,11 @@ namespace webuntis2BlaueBriefe
                     try
                     {
                         if (line != null)
-                        {                            
+                        {
                             var x = line.Split('\t');
                             i++;
 
-                            if (i==2629)
+                            if (i == 2629)
                             {
                                 string a = "";
                             }
@@ -71,13 +71,13 @@ namespace webuntis2BlaueBriefe
                                 leistung.Benutzer = x[1];
                                 leistung.SchlüsselExtern = Convert.ToInt32(x[2]);
                                 leistung.Halbjahresgesamtnote = x[3];
-                                Console.WriteLine("hat geklappt.\n");                                
+                                Console.WriteLine("hat geklappt.\n");
                             }
 
                             if (x.Length < 4)
                             {
                                 Console.WriteLine("\n\n[!] MarksPerLesson.CSV: In der Zeile " + i + " stimmt die Anzahl der Spalten nicht. Das kann passieren, wenn z. B. die Lehrkraft bei einer Bemerkung einen Umbruch eingibt. Mit Suchen & Ersetzen kann die Datei MarksPerLesson.CSV korrigiert werden.");
-                                Console.ReadKey();                                
+                                Console.ReadKey();
                                 throw new Exception("\n\n[!] MarksPerLesson.CSV: In der Zeile " + i + " stimmt die Anzahl der Spalten nicht. Das kann passieren, wenn z. B. die Lehrkraft bei einer Bemerkung einen Umbruch eingibt. Mit Suchen & Ersetzen kann die Datei MarksPerLesson.CSV korrigiert werden.");
                             }
 
@@ -85,19 +85,27 @@ namespace webuntis2BlaueBriefe
 
                             if (Global.Mangelhaft.Contains(leistung.BlauerBriefNote) || Global.Ungenügend.Contains(leistung.BlauerBriefNote))
                             {
+
                                 if (leistung.Prüfungsart == Global.BlaueBriefe)
                                 {
-                                    if (leistung.IstKeinDiff(klasses))
+                                    if (leistung.Fach != null)
                                     {
-                                        this.Add(leistung);
+                                        if (leistung.IstKeinDiff(klasses))
+                                        {
+                                            this.Add(leistung);
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine("ACHTUNG: Mahnung im Diff-Bereich. " + leistung.Klasse + ": " + leistung.Fach.BezeichnungImZeugnis + " [ENTER]");
+                                            Console.ReadKey();
+                                        }
                                     }
                                     else
                                     {
-                                        Console.WriteLine("ACHTUNG: Mahnung im Diff-Bereich. " + leistung.Klasse + ": " + leistung.Fach.BezeichnungImZeugnis + " [ENTER]");
-                                        Console.ReadKey();
-                                    }                               
-                                }                               
-                            }                            
+                                        Console.WriteLine("ACHTUNG: Blauer Brief ohne Fach bei Zeile: " + i);
+                                    }
+                                }
+                            }
                         }
                     }
                     catch (Exception ex)

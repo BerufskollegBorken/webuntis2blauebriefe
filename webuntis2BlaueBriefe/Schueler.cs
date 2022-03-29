@@ -247,7 +247,7 @@ namespace webuntis2BlaueBriefe
         }
         internal void RenderBrief(string folder)
         {
-            string footer = (Volljaehrig ? "Vollj.;" : "Minderj.;" ) + Klasse + " HZ: " + RenderNotenHz() + "; Jetzt: " + RenderNotenJetzt() + "; ";
+            string footer = (Volljaehrig ? "Vollj.;" : "Minderj.;" ) + Klasse + ";" + Nachname + "," + Vorname + "; HZ: " + RenderNotenHz() + "; Jetzt: " + RenderNotenJetzt() + "; ";
             Console.Write(footer, folder);
             
             Protokoll = "<td>" + Nachname + ", " + Vorname + "</td><td>" + (Volljaehrig ? "J" : "N") + "</td><td>" + RenderNotenHz() + "</td><td>" + RenderNotenJetzt() + "</td>";
