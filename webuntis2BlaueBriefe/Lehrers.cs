@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Published under the terms of GPLv3 Stefan Bäumer 2023
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 

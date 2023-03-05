@@ -1,4 +1,5 @@
-﻿using Microsoft.Office.Interop.Word;
+﻿// Published under the terms of GPLv3 Stefan Bäumer 2023
+using Microsoft.Office.Interop.Word;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,11 +14,9 @@ namespace webuntis2BlaueBriefe
         public string Nachname { get; internal set; }
         public string Anrede { get; internal set; }
         public string Vorname { get; internal set; }
-        public object Telefons { get; internal set; }
         public string Plz { get; internal set; }
         public string Ort { get; internal set; }
         public string Strasse { get; internal set; }
-        public string Email { get; internal set; }
         public string Klasse { get; set; }
         public string Jahrgang { get; set; }
         public DateTime Geburtsdatum { get; set; }
@@ -44,7 +43,6 @@ namespace webuntis2BlaueBriefe
         public string Klassenleitung { get; internal set; }
         public string KlassenleitungMw { get; internal set; }
         public string KlassenleitungMail { get; internal set; }
-        public string Protokoll { get; private set; }
         public List<string> Dateien { get; set; }
 
         internal void RenderMitteilung(string art, string folder)

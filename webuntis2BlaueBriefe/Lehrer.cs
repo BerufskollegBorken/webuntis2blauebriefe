@@ -1,4 +1,5 @@
-﻿namespace webuntis2BlaueBriefe
+﻿// Published under the terms of GPLv3 Stefan Bäumer 2023
+namespace webuntis2BlaueBriefe
 {
     public class Lehrer
     {

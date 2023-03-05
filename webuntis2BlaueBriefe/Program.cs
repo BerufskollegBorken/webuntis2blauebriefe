@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Published under the terms of GPLv3 Stefan Bäumer 2023
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -17,7 +18,7 @@ namespace webuntis2BlaueBriefe
 
             try
             {
-                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2022 | Version 20230310");
+                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2023 | Version 20230310");
                 Console.WriteLine("====================================================================================================");
                 Console.WriteLine("");
 
@@ -61,8 +62,7 @@ namespace webuntis2BlaueBriefe
 
                         if ((from s in sd.DefizitäreLeistungen where s.NeueDefizitLeistung select s.NoteJetzt).Sum() == 5)
                         {
-                            Console.Write("jetzt eine 5,");
-                                                        
+                            Console.Write("jetzt eine 5,");                                                        
                             sd.RenderMitteilung("M", Folder);
                         }
 
