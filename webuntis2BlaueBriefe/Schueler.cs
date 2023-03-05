@@ -23,7 +23,7 @@ namespace webuntis2BlaueBriefe
         public DateTime Geburtsdatum { get; set; }
         public bool Volljaehrig { get; set; }
         public string GeschlechtMw { get; set; }
-        public DefizitäreLeistungen DefizitäreLeistungen { get; set; }
+        public Leistungen DefizitäreLeistungen { get; set; }
         public string Typ { get; set; }       
         public string MAnrede { get; internal set; }
         public string MSorgeberechtigtJn { get; internal set; }

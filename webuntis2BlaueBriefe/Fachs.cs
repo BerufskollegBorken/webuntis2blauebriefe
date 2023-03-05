@@ -11,7 +11,7 @@ namespace webuntis2BlaueBriefe
         {
         }
 
-        public Fachs(string connectionStringUntis, DefizitäreLeistungen dlw)
+        public Fachs(string connectionStringUntis, Leistungen dlw)
         {
             using (SqlConnection sqlConnection = new SqlConnection(Global.ConnectionStringUntis))
             {

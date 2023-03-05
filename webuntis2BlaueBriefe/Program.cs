@@ -19,8 +19,6 @@ namespace webuntis2BlaueBriefe
 
         static void Main(string[] args)
         {
-            System.Net.ServicePointManager.ServerCertificateValidationCallback = ((sender, certificate, chain, sslPolicyErrors) => true);
-
             string steuerdatei = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), DateTime.Now.ToString("yyMMdd-HHmmss") + "_webuntisnoten2atlantis_" + System.Security.Principal.WindowsIdentity.GetCurrent().Name.ToUpper().Split('\\')[1] + ".csv");
 
             try
@@ -34,12 +32,12 @@ namespace webuntis2BlaueBriefe
                 string sourceMarksPerLesson = CheckFile(User, "MarksPerLesson");
 
                 Periodes periodes = new Periodes();
-                DefizitäreLeistungen defizitäreWebuntisLeistungen = new DefizitäreLeistungen(sourceMarksPerLesson);
+                Leistungen defizitäreWebuntisLeistungen = new Leistungen(sourceMarksPerLesson);
                 Fachs fachs = new Fachs(Global.ConnectionStringUntis, defizitäreWebuntisLeistungen);
                 Lehrers lehrers = new Lehrers(periodes);
                 Klasses klasses = new Klasses(lehrers, periodes, defizitäreWebuntisLeistungen);
                 
-                DefizitäreLeistungen atlantisLeistungen = new DefizitäreLeistungen(Global.ConnectionStringAtlantis, AktSj, defizitäreWebuntisLeistungen);
+                Leistungen atlantisLeistungen = new Leistungen(Global.ConnectionStringAtlantis, AktSj, defizitäreWebuntisLeistungen);
                 
                 Schuelers schuelerMitDefiziten = new Schuelers(defizitäreWebuntisLeistungen, atlantisLeistungen, klasses, lehrers, fachs);
 
@@ -104,12 +102,9 @@ namespace webuntis2BlaueBriefe
                     } 
                 }
 
-
-
-                //schuelerMitDefiziten.RenderBriefeUndSteuerdatei(steuerdatei);
-
+                Console.WriteLine("");
                 Console.WriteLine("Verarbeitung beendet. ENTER");
-                //Process.Start(Folder);
+                Process.Start(Folder);
                 Console.ReadKey();
             }
             catch(IOException ex)
@@ -118,8 +113,12 @@ namespace webuntis2BlaueBriefe
                 Console.WriteLine("");
                 if (ex.ToString().Contains("bereits vorhanden"))
                 {
-                    Console.WriteLine("FEHLER: Die Datei existiert bereits. Bitte zuerst löschen. Dann erneut starten.");                    
-                }                
+                    Console.WriteLine("FEHLER: Die Datei existiert bereits. Bitte zuerst löschen. Dann erneut starten.");
+                }
+                else
+                {
+                    Console.WriteLine(ex);
+                }            
                 Console.ReadKey();
                 Environment.Exit(0);
             }

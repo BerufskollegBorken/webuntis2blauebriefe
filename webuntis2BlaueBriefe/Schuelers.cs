@@ -19,7 +19,7 @@ namespace webuntis2BlaueBriefe
         {
         }
 
-        public Schuelers(DefizitäreLeistungen defizitäreWebuntisLeistungen, DefizitäreLeistungen defizitäreAtlantisLeistungen, Klasses klasses, Lehrers lehrers, Fachs fachs)
+        public Schuelers(Leistungen defizitäreWebuntisLeistungen, Leistungen defizitäreAtlantisLeistungen, Klasses klasses, Lehrers lehrers, Fachs fachs)
         {
             foreach (var idAtlantis in (from t in defizitäreWebuntisLeistungen
                                         where t.Prüfungsart.StartsWith("Mahnung")
@@ -122,7 +122,7 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                             }
                         }
 
-                        schueler.DefizitäreLeistungen = new DefizitäreLeistungen();
+                        schueler.DefizitäreLeistungen = new Leistungen();
 
                         // Defizitäre Leistungen kommen aus Webuntis ...
 
@@ -153,7 +153,6 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                                 schueler.DefizitäreLeistungen.Add(al);
                             }
                         }
-
 
                         schueler.Dateien = new List<string>();
 

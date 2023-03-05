@@ -9,7 +9,7 @@ namespace webuntis2BlaueBriefe
     {
         public Lehrers Lehrers { get; set; }
 
-        public Klasses(Lehrers lehrers, Periodes periodes, DefizitäreLeistungen dlw)
+        public Klasses(Lehrers lehrers, Periodes periodes, Leistungen dlw)
         {
             Lehrers = lehrers;
 

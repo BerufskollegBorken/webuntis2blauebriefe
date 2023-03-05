@@ -10,9 +10,9 @@ using System.Text.RegularExpressions;
 
 namespace webuntis2BlaueBriefe
 {
-    public class DefizitäreLeistungen : List<Leistung>
+    public class Leistungen : List<Leistung>
     {
-        public DefizitäreLeistungen(string sourceMarksPerLesson)
+        public Leistungen(string sourceMarksPerLesson)
         {
             using (StreamReader reader = new StreamReader(sourceMarksPerLesson))
             {
@@ -278,7 +278,7 @@ namespace webuntis2BlaueBriefe
         //    return l;
         //}
 
-        public DefizitäreLeistungen(string connetionstringAtlantis, List<string> aktSj,DefizitäreLeistungen alleWebuntisLeistungen)
+        public Leistungen(string connetionstringAtlantis, List<string> aktSj,Leistungen alleWebuntisLeistungen)
         {
             var interessierendeKlassen = (from w in alleWebuntisLeistungen select w.Klasse).Distinct().ToList();
 
@@ -446,7 +446,7 @@ ORDER BY DBA.klasse.s_klasse_art DESC, DBA.noten_kopf.dat_notenkonferenz DESC, D
             
         }
 
-        public DefizitäreLeistungen()
+        public Leistungen()
         {
         }
 
