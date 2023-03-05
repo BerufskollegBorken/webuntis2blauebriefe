@@ -11,20 +11,12 @@ namespace webuntis2BlaueBriefe
         public static string User = System.Security.Principal.WindowsIdentity.GetCurrent().Name.ToUpper().Split('\\')[1];
         public static string Folder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\BlaueBriefe-" + DateTime.Now.ToString("yyyyMMdd-hhmm");
 
-        public static List<string> AktSj = new List<string>
-                {
-                    (DateTime.Now.Month >= 8 ? DateTime.Now.Year : DateTime.Now.Year - 1).ToString(),
-                    (DateTime.Now.Month >= 8 ? DateTime.Now.Year + 1 - 2000 : DateTime.Now.Year - 2000).ToString()
-                };
-
         static void Main(string[] args)
         {
             string steuerdatei = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), DateTime.Now.ToString("yyMMdd-HHmmss") + "_webuntisnoten2atlantis_" + System.Security.Principal.WindowsIdentity.GetCurrent().Name.ToUpper().Split('\\')[1] + ".csv");
 
             try
             {
-                Global.Zeilen = new List<string>() { "AnDieErziehungsberechtigtenVon; anrede; anredeLerncoaching; vorname; nachname; dichSie; plz; straße; ort; klasse; heute; betreff; absatz1; fächer; absatz2; absatz3; klassenleitung; klassenlehrerIn; hinweis"};
-
                 Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2022 | Version 20230310");
                 Console.WriteLine("====================================================================================================");
                 Console.WriteLine("");
@@ -36,7 +28,7 @@ namespace webuntis2BlaueBriefe
                 Lehrers lehrers = new Lehrers(periodes);
                 Klasses klasses = new Klasses(lehrers, periodes, defizitäreWebuntisLeistungen);
                 
-                Leistungen atlantisLeistungen = new Leistungen(Global.ConnectionStringAtlantis, AktSj, defizitäreWebuntisLeistungen);
+                Leistungen atlantisLeistungen = new Leistungen(Global.ConnectionStringAtlantis, defizitäreWebuntisLeistungen);
                 
                 Schuelers schuelerMitDefiziten = new Schuelers(defizitäreWebuntisLeistungen, atlantisLeistungen, klasses, lehrers);
 
@@ -112,8 +104,9 @@ namespace webuntis2BlaueBriefe
 
                 Console.WriteLine("");
                 Console.WriteLine("Verarbeitung beendet. ENTER");
-                //Process.Start(Folder);
+                
                 Console.ReadKey();
+                Process.Start(Folder);
             }
             catch(IOException ex)
             {
@@ -137,21 +130,6 @@ namespace webuntis2BlaueBriefe
                 Console.WriteLine(ex);
                 Console.ReadKey();
                 Environment.Exit(0);
-            }
-        }
-
-        private static void CsvDateiExistiert()
-        {
-            if (!File.Exists(Global.InputNotenCsv))
-            {
-                RenderNotenexportCsv(Global.InputNotenCsv);
-            }
-            else
-            {
-                if (System.IO.File.GetLastWriteTime(Global.InputNotenCsv).Date != DateTime.Now.Date)
-                {
-                    RenderNotenexportCsv(Global.InputNotenCsv);
-                }
             }
         }
 

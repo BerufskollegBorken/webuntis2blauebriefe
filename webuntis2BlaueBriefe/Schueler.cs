@@ -64,8 +64,6 @@ namespace webuntis2BlaueBriefe
 
             foreach (var strasse in sss)
             {
-                string zeile = "";
-
                 var sorgeberechtigter = (from s in this.Sorgeberechtigte where s.Strasse == strasse select s).FirstOrDefault();
 
                 var origFileName = "Blaue Briefe.docx";
@@ -94,62 +92,36 @@ namespace webuntis2BlaueBriefe
                 else
                 {
                     FindAndReplace(wordApp, doc, "<AnDieErziehungsberechtigtenVon>", "An die Erziehungsberechtigten von");
-                    Protokoll += "An die Erziehungsberechtigten von ";
-                    zeile += "An die Erziehungsberechtigten von " + ";";
                 }
 
                 FindAndReplace(wordApp, doc,"<anrede>", GetAnrede());
-                zeile += GetAnrede() + ";";
                 FindAndReplace(wordApp, doc,"<anredeLerncoaching>", GetAnredeLerncoaching());
-                zeile += GetAnredeLerncoaching() + ";";
                 FindAndReplace(wordApp, doc,"<vorname>", Vorname);
-                zeile += Vorname + ";";
                 FindAndReplace(wordApp, doc,"<nachname>", Nachname);
-                zeile += Nachname + ";";
                 FindAndReplace(wordApp, doc,"<dichSie>", Volljaehrig ? "Sie" : "Dich");
-                zeile += (Volljaehrig ? "Sie" : "Dich") + ";";
-
+                
                 if (!Volljaehrig)
                 {
                     FindAndReplace(wordApp, doc,"<plz>", sorgeberechtigter.Plz);
-                    zeile += sorgeberechtigter.Plz + ";";
                     FindAndReplace(wordApp, doc,"<straße>", sorgeberechtigter.Strasse);
-                    zeile += sorgeberechtigter.Strasse + ";";
-                    FindAndReplace(wordApp, doc,"<ort>", sorgeberechtigter.Ort);
-                    zeile += sorgeberechtigter.Ort + ";";
-                    Protokoll += sorgeberechtigter.Strasse + " " + sorgeberechtigter.Plz + " " + sorgeberechtigter.Ort + " ";
+                    FindAndReplace(wordApp, doc,"<ort>", sorgeberechtigter.Ort);                    
                 }
                 else
                 {
                     FindAndReplace(wordApp, doc,"<plz>", "");
-                    zeile += Plz + ";";
                     FindAndReplace(wordApp, doc,"<straße>", "!!! Kein Briefversand bei Volljährigen !!!");
-                    zeile += Strasse + ";";
-                    FindAndReplace(wordApp, doc,"<ort>", "");
-                    zeile += Ort + ";";
-                    Protokoll += Strasse + " " + Plz + " " + Ort + " ";
+                    FindAndReplace(wordApp, doc,"<ort>", "");                    
                 }
                 FindAndReplace(wordApp, doc,"<klasse>", Klasse);
-                zeile += Klasse + ";";
                 FindAndReplace(wordApp, doc,"<heute>", DateTime.Now.ToShortDateString());
-                zeile += DateTime.Now.ToShortDateString() + ";";
                 FindAndReplace(wordApp, doc,"<betreff>", art == "M" ? "Mitteilung über den Leistungsstand" : "Gefährdung der Versetzung");
-                zeile += art == "M" ? "Mitteilung über den Leistungsstand" : "Gefährdung der Versetzung" + ";";
                 FindAndReplace(wordApp, doc,"<absatz1>", GetAbsatz1(art));
-                zeile += GetAbsatz1(art) + ";";
-                FindAndReplace(wordApp, doc,"<fächer>", RenderFächer());
-                zeile += RenderFächer() + ";";
+                FindAndReplace(wordApp, doc,"<fächer>", RenderFächer(art));
                 FindAndReplace(wordApp, doc,"<absatz2>", GetAbsatz2(art));
-                zeile += GetAbsatz2(art) + ";";
                 FindAndReplace(wordApp, doc,"<absatz3>", GetAbsatz3());
-                zeile += GetAbsatz3() + ";";
                 FindAndReplace(wordApp, doc,"<klassenleitung>", Klassenleitung);
-                zeile += Klassenleitung + ";";
                 FindAndReplace(wordApp, doc,"<klassenlehrerIn>", KlassenleitungMw == "Herr" ? "Klassenlehrer" : "Klassenlehrerin");
-                zeile += (KlassenleitungMw == "Herr" ? "Klassenlehrer" : "Klassenlehrerin") + ";";
-
                 FindAndReplace(wordApp, doc,"<hinweis>", GetHinweis());
-                zeile += GetHinweis() + ";";
                 FindAndReplace(wordApp, doc,"<footer>", "");
                 
                 doc.ExportAsFixedFormat(fileName+".pdf", WdExportFormat.wdExportFormatPDF, false, WdExportOptimizeFor.wdExportOptimizeForOnScreen,
@@ -161,7 +133,6 @@ namespace webuntis2BlaueBriefe
                 doc = null;
                 GC.Collect();
                 wordApp.Quit();
-                Global.Zeilen.Add(zeile);
             }
             if (art == "M")
             {
@@ -217,7 +188,7 @@ namespace webuntis2BlaueBriefe
             }
             else
             {
-                return "abweichend von der im letzten Zeugnis erteilten Note nochmals verschlechtert hat.";
+                return "abweichend von der im letzten Zeugnis erteilten Note nur noch ungenügend ist.";
             }
         }
 
@@ -450,14 +421,24 @@ Leistung";
             }
         }
 
-        private string RenderFächer()
+        private string RenderFächer(string art)
         {
             string x = "";
 
-            foreach (var dl in (from d in DefizitäreLeistungen where d.NeueDefizitLeistung select d).ToList())
+            if (art == "V")
             {
-                x += " " + dl.BezeichnungImZeugnis + " (" + NoteKlartext(dl.NoteJetzt) + ")\r\n";
+                foreach (var dl in (from d in DefizitäreLeistungen where d.NoteHalbjahr == 5 where d.NoteJetzt == 6 select d).ToList())
+                {
+                    x += " " + dl.BezeichnungImZeugnis + " (" + NoteKlartext(dl.NoteJetzt) + ")\r\n";
+                }
             }
+            else
+            {
+                foreach (var dl in (from d in DefizitäreLeistungen where d.NeueDefizitLeistung select d).ToList())
+                {
+                    x += " " + dl.BezeichnungImZeugnis + " (" + NoteKlartext(dl.NoteJetzt) + ")\r\n";
+                }
+            }            
             return x.Replace(" **)","");
         }
 

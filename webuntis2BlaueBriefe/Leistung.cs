@@ -40,23 +40,5 @@ namespace webuntis2BlaueBriefe
         public bool NeueDefizitLeistung { get; internal set; }
         public bool NochmaligeVerschlechterungAuf6 { get; internal set; }
         public string KlasseAtlantis { get; internal set; }
-
-        internal bool IstKeinDiff(Klasses klasses)
-        {
-            foreach (var klasse in klasses)
-            {
-                if (klasse.NameUntis == this.Klasse)
-                {
-                    foreach (var fach in klasse.Stundentafel.Fachs)
-                    {
-                        if (fach.BezeichnungImZeugnis == this.Name)
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
-        }
     }
 }

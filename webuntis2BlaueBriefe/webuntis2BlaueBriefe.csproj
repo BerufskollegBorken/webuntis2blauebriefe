@@ -76,8 +76,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Fach.cs" />
-    <Compile Include="Fachs.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="Klasse.cs" />
     <Compile Include="Klasses.cs" />
@@ -94,8 +92,6 @@
     <Compile Include="Schuelers.cs" />
     <Compile Include="Sorgeberechtigt.cs" />
     <Compile Include="Sorgeberechtigte.cs" />
-    <Compile Include="Stundentafel.cs" />
-    <Compile Include="Stundentafels.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

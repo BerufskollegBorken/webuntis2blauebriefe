@@ -1,5 +1,4 @@
-﻿using Microsoft.Exchange.WebServices.Data;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -7,9 +6,7 @@ using System.Data.Odbc;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Mail;
-using System.Text;
+
 
 namespace webuntis2BlaueBriefe
 {
@@ -127,12 +124,12 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                         // Defizitäre Leistungen kommen aus Webuntis ...
 
                         foreach (var wl in (from t in defizitäreWebuntisLeistungen
-                                              where t.Prüfungsart.StartsWith("Mahnung")
-                                              where t.SchlüsselExtern == schueler.IdAtlantis
-                                              select t).ToList())
+                                            where t.Prüfungsart.StartsWith("Mahnung")
+                                            where t.SchlüsselExtern == schueler.IdAtlantis
+                                            select t).ToList())
                         {
                             var al = defizitäreAtlantisLeistungen.GetKorrespondierendeAtlantisLeistung(wl);
-                                                        
+
                             wl.NoteHalbjahr = al.NoteHalbjahr;
                             wl.BezeichnungImZeugnis = al.BezeichnungImZeugnis;
                             wl.NeueDefizitLeistung = wl.NoteHalbjahr <= 4 && wl.NoteJetzt >= 5 ? true : false;
@@ -149,7 +146,7 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                             if (!(from s in schueler.DefizitäreLeistungen where s.Fach == al.Fach select s).Any())
                             {
                                 al.NoteJetzt = 4;
-                                al.NeueDefizitLeistung = al.NoteHalbjahr <= 4 && al.NoteJetzt >= 5 ? true : false;                                
+                                al.NeueDefizitLeistung = al.NoteHalbjahr <= 4 && al.NoteJetzt >= 5 ? true : false;
                                 schueler.DefizitäreLeistungen.Add(al);
                             }
                         }
@@ -167,53 +164,6 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                 }
             }
             Console.WriteLine(("Schüler mit Defiziten " + ".".PadRight(this.Count / 150, '.')).PadRight(48, '.') + (" " + this.Count).ToString().PadLeft(4), '.');
-        }
-
-        internal void RenderBriefeUndSteuerdatei(string steuerdatei)
-        {
-            var folder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\BlaueBriefe-" + DateTime.Now.ToString("yyyyMMdd-hhmm");
-
-            foreach (var schueler in this)
-            {
-                schueler.RenderBrief(folder);
-            }
-
-            using (StreamWriter writer = new StreamWriter(steuerdatei, true, Encoding.Default))
-            {
-                foreach (var o in Global.Zeilen)
-                {
-                    writer.WriteLine(o);
-                }
-            }
-
-            OpenFile(steuerdatei);
-        }
-
-        private void OpenFile(string steuerdatei)
-        {
-            try
-            {
-                Process notepadPlus = new Process();
-                notepadPlus.StartInfo.FileName = "notepad++.exe";
-
-                notepadPlus.StartInfo.Arguments = steuerdatei;
-
-                notepadPlus.Start();
-            }
-            catch (Exception)
-            {
-                System.Diagnostics.Process.Start("Notepad.exe", steuerdatei);
-            }
-        }
-
-        internal void RenderSteuerdatei(string folder)
-        {
-            Console.WriteLine(this[0].Klasse + "\n" + "=".PadRight(this[0].Klasse.Length - 1, '='));
-
-            foreach (var schueler in this)
-            {
-                schueler.RenderBrief(folder);
-            }
         }
     }
 }

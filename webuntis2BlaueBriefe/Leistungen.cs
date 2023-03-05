@@ -32,7 +32,7 @@ namespace webuntis2BlaueBriefe
                         {
                             var x = line.Split('\t');
                             i++;
-                                                        
+
                             if (x.Length == 10)
                             {
                                 leistung = new Leistung();
@@ -41,7 +41,7 @@ namespace webuntis2BlaueBriefe
                                 leistung.Klasse = x[2];
                                 leistung.Fach = x[3];
                                 leistung.Prüfungsart = x[4];
-                                leistung.NoteJetzt = GesamtPunkte2Gesamtnote(x[5]);                                
+                                leistung.NoteJetzt = GesamtPunkte2Gesamtnote(x[5]);
                                 leistung.Bemerkung = x[6];
                                 leistung.Benutzer = x[7];
                                 leistung.SchlüsselExtern = Convert.ToInt32(x[8]);
@@ -87,7 +87,7 @@ namespace webuntis2BlaueBriefe
                                 {
                                     Console.WriteLine("ACHTUNG: Blauer Brief ohne Fach bei Zeile: " + i);
                                 }
-                            }                            
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -183,7 +183,7 @@ namespace webuntis2BlaueBriefe
             var x = (from t in this
                      where t.SchlüsselExtern == webuntisLeistung.SchlüsselExtern
                      where t.Klasse == webuntisLeistung.Klasse
-                     where t.Fach.Replace("  "," ") == webuntisLeistung.Fach
+                     where t.Fach.Replace("  ", " ") == webuntisLeistung.Fach
                      select t).ToList();
 
             // Es muss exakt eine korrespondierende Leistung geben
@@ -240,55 +240,11 @@ namespace webuntis2BlaueBriefe
                     return this[index - 1];
                 }
             }
-            
-            return x[0];            
+
+            return x[0];
         }
 
-        internal string GetBezeichnungImZeugnis(Leistung item)
-        {
-            throw new NotImplementedException();
-        }
-
-        //internal DefizitäreLeistungen GetZuMahnende(DefizitäreLeistungen defizitäreAtlantisLeistungen)
-        //{
-        //    DefizitäreLeistungen l = new DefizitäreLeistungen();
-
-        //    foreach (var dWL in this)
-        //    {
-        //        var dal = (from a in defizitäreAtlantisLeistungen
-        //                   where a.SchlüsselExtern == dWL.SchlüsselExtern
-        //                   where a.Klasse == dWL.Klasse
-        //                   where a.Fachstring == dWL.Fach.KürzelUntis
-        //                   select a).FirstOrDefault();
-
-        //        if (dal == null)
-        //        {
-        //            Console.WriteLine("Die Leistung kann nicht null sein: " + dWL.Name);
-        //            Console.ReadKey();
-
-        //        }
-        //        string aa = "";
-
-        //        // Veränderung von Nicht-Defizit nach 5
-
-        //        if (dal.Gesamtnote != "5" && dal.Gesamtnote != "6" && dWL.Gesamtnote == "5")
-        //        {
-        //            aa = "";
-        //        }
-
-        //        // Veränderung von 5 nach 6
-
-        //        if (dal.Gesamtnote == "5" && dWL.Gesamtnote == "6")
-        //        {
-        //            aa = "";
-        //        }
-
-
-        //    }
-        //    return l;
-        //}
-
-        public Leistungen(string connetionstringAtlantis, List<string> aktSj,Leistungen alleWebuntisLeistungen)
+        public Leistungen(string connetionstringAtlantis, Leistungen alleWebuntisLeistungen)
         {
             var interessierendeKlassen = (from w in alleWebuntisLeistungen select w.Klasse).Distinct().ToList();
 
@@ -296,9 +252,9 @@ namespace webuntis2BlaueBriefe
 
             foreach (var iK in interessierendeKlassen)
             {
-                var schuelersId = (from a in alleWebuntisLeistungen 
+                var schuelersId = (from a in alleWebuntisLeistungen
                                    where a.Klasse == iK
-                                   where a.Prüfungsart.StartsWith("Mahnung")
+                                   where a.Prüfungsart == Global.BlaueBriefe
                                    select a.SchlüsselExtern).Distinct().ToList();
 
                 foreach (var schuelerId in schuelersId)
@@ -355,7 +311,7 @@ DBA.noten_kopf.bemerkung_block_3 AS Bemerkung3,
 DBA.noten_kopf.dat_notenkonferenz AS Konferenzdatum,
 DBA.klasse.klasse AS Klasse
 FROM(((DBA.noten_kopf JOIN DBA.schue_sj ON DBA.noten_kopf.pj_id = DBA.schue_sj.pj_id) JOIN DBA.klasse ON DBA.schue_sj.kl_id = DBA.klasse.kl_id) JOIN DBA.noten_einzel ON DBA.noten_kopf.nok_id = DBA.noten_einzel.nok_id ) JOIN DBA.schueler ON DBA.noten_einzel.pu_id = DBA.schueler.pu_id
-WHERE schue_sj.s_typ_vorgang = 'A' AND s_typ_nok = 'HZ' AND schue_sj.vorgang_schuljahr = '" + aktSj[0] + "/" + aktSj[1] + @"'  AND
+WHERE schue_sj.s_typ_vorgang = 'A' AND s_typ_nok = 'HZ' AND schue_sj.vorgang_schuljahr = '" + Global.AktSjAtlantis + @"'  AND
 (  
   " + abfrage + @"
 )
@@ -424,10 +380,10 @@ ORDER BY DBA.klasse.s_klasse_art DESC, DBA.noten_kopf.dat_notenkonferenz DESC, D
                                     leistung.Zeugnisart = theRow["Zeugnisart"].ToString();
                                     leistung.BezeichnungImZeugnis = theRow["Zeugnistext"].ToString();
                                     leistung.Konferenzdatum = theRow["Konferenzdatum"].ToString().Length < 3 ? new DateTime() : (DateTime.ParseExact(theRow["Konferenzdatum"].ToString(), "dd.MM.yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)).AddHours(15);
-                                                                        
+
 
                                     if (
-                                        leistung.Schuljahr == aktSj[0]+ "/"+ aktSj[1] && 
+                                        leistung.Schuljahr == Global.AktSjAtlantis &&
                                         leistung.HzJz == "HZ" &&
                                         leistung.NoteHalbjahr != 0
                                         )
@@ -443,7 +399,7 @@ ORDER BY DBA.klasse.s_klasse_art DESC, DBA.noten_kopf.dat_notenkonferenz DESC, D
                             }
                         }
                     }
-                    connection.Close();                    
+                    connection.Close();
                 }
             }
             catch (Exception ex)
@@ -453,35 +409,10 @@ ORDER BY DBA.klasse.s_klasse_art DESC, DBA.noten_kopf.dat_notenkonferenz DESC, D
 
             var alleFächerDesAktuellenAbschnitts = (from l in this where (l.Konferenzdatum > DateTime.Now.AddDays(-20) || l.Konferenzdatum.Year == 1) select l.Fach).ToList();
 
-            
         }
 
         public Leistungen()
         {
-        }
-
-        private string RenderFachs(List<string> fachs)
-        {
-            string f = "";
-
-            foreach (var fach in fachs)
-            {
-                f += fach + ",";
-            }
-
-            return f.TrimEnd(',');
-        }
-
-        private void EditorOeffnen(string pfad)
-        {
-            try
-            {
-                System.Diagnostics.Process.Start(@"C:\Program Files (x86)\Notepad++\Notepad++.exe", pfad);
-            }
-            catch (Exception)
-            {
-                System.Diagnostics.Process.Start("Notepad.exe", pfad);
-            }
         }
     }
 }
