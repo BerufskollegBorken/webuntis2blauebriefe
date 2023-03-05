@@ -23,7 +23,7 @@ namespace webuntis2BlaueBriefe
         public DateTime Geburtsdatum { get; set; }
         public bool Volljaehrig { get; set; }
         public string GeschlechtMw { get; set; }
-        public Fachs Fachs { get; set; }
+        public DefizitäreLeistungen DefizitäreLeistungen { get; set; }
         public string Typ { get; set; }       
         public string MAnrede { get; internal set; }
         public string MSorgeberechtigtJn { get; internal set; }
@@ -47,22 +47,9 @@ namespace webuntis2BlaueBriefe
         public string Protokoll { get; private set; }
         public List<string> Dateien { get; set; }
 
-        internal void RenderMitteilung(string art, string footer, string folder)
+        internal void RenderMitteilung(string art, string folder)
         {
             System.IO.Directory.CreateDirectory(folder);
-
-            if (art == "G")
-            {
-                Console.Write("Gefährdung ...");
-                footer += "Gefährdung ...";
-                Protokoll += "<td>" + RenderGefährdungNeu() + " </td>";
-            }
-            else
-            {
-                Console.Write("Mitteilung über den Leistungsstand ...");
-                footer += "Mitteilung über den Leistungsstand ...";
-                Protokoll += "<td>Mitteilung über den Leistungsstand</td>";
-            }
 
             // Für jede unterschiedliche Adresse
             
@@ -100,76 +87,70 @@ namespace webuntis2BlaueBriefe
                 Document doc = wordApp.Documents.Open(fileName, ReadOnly: false, Visible: true);
                 doc.Activate();
 
-                Protokoll += "<td>";
-
                 if (Volljaehrig)
                 {
-                    FindAndReplace(wordApp, "<AnDieErziehungsberechtigtenVon>", "");                    
+                    FindAndReplace(wordApp, doc, "<AnDieErziehungsberechtigtenVon>", "");                    
                 }
                 else
                 {
-                    FindAndReplace(wordApp, "<AnDieErziehungsberechtigtenVon>", "An die Erziehungsberechtigten von");
+                    FindAndReplace(wordApp, doc, "<AnDieErziehungsberechtigtenVon>", "An die Erziehungsberechtigten von");
                     Protokoll += "An die Erziehungsberechtigten von ";
                     zeile += "An die Erziehungsberechtigten von " + ";";
                 }
 
-                FindAndReplace(wordApp, "<anrede>", GetAnrede());
+                FindAndReplace(wordApp, doc,"<anrede>", GetAnrede());
                 zeile += GetAnrede() + ";";
-                FindAndReplace(wordApp, "<anredeLerncoaching>", GetAnredeLerncoaching());
+                FindAndReplace(wordApp, doc,"<anredeLerncoaching>", GetAnredeLerncoaching());
                 zeile += GetAnredeLerncoaching() + ";";
-                FindAndReplace(wordApp, "<vorname>", Vorname);
+                FindAndReplace(wordApp, doc,"<vorname>", Vorname);
                 zeile += Vorname + ";";
-                FindAndReplace(wordApp, "<nachname>", Nachname);
+                FindAndReplace(wordApp, doc,"<nachname>", Nachname);
                 zeile += Nachname + ";";
-                FindAndReplace(wordApp, "<dichSie>", Volljaehrig ? "Sie" : "Dich");
+                FindAndReplace(wordApp, doc,"<dichSie>", Volljaehrig ? "Sie" : "Dich");
                 zeile += (Volljaehrig ? "Sie" : "Dich") + ";";
-
-                Protokoll += Vorname + " " + Nachname + " ";
 
                 if (!Volljaehrig)
                 {
-                    FindAndReplace(wordApp, "<plz>", sorgeberechtigter.Plz);
+                    FindAndReplace(wordApp, doc,"<plz>", sorgeberechtigter.Plz);
                     zeile += sorgeberechtigter.Plz + ";";
-                    FindAndReplace(wordApp, "<straße>", sorgeberechtigter.Strasse);
+                    FindAndReplace(wordApp, doc,"<straße>", sorgeberechtigter.Strasse);
                     zeile += sorgeberechtigter.Strasse + ";";
-                    FindAndReplace(wordApp, "<ort>", sorgeberechtigter.Ort);
+                    FindAndReplace(wordApp, doc,"<ort>", sorgeberechtigter.Ort);
                     zeile += sorgeberechtigter.Ort + ";";
                     Protokoll += sorgeberechtigter.Strasse + " " + sorgeberechtigter.Plz + " " + sorgeberechtigter.Ort + " ";
                 }
                 else
                 {
-                    FindAndReplace(wordApp, "<plz>", "");
+                    FindAndReplace(wordApp, doc,"<plz>", "");
                     zeile += Plz + ";";
-                    FindAndReplace(wordApp, "<straße>", "!!! Kein Briefversand bei Volljährigen !!!");
+                    FindAndReplace(wordApp, doc,"<straße>", "!!! Kein Briefversand bei Volljährigen !!!");
                     zeile += Strasse + ";";
-                    FindAndReplace(wordApp, "<ort>", "");
+                    FindAndReplace(wordApp, doc,"<ort>", "");
                     zeile += Ort + ";";
                     Protokoll += Strasse + " " + Plz + " " + Ort + " ";
                 }
-                FindAndReplace(wordApp, "<klasse>", Klasse);
+                FindAndReplace(wordApp, doc,"<klasse>", Klasse);
                 zeile += Klasse + ";";
-                FindAndReplace(wordApp, "<heute>", DateTime.Now.ToShortDateString());
+                FindAndReplace(wordApp, doc,"<heute>", DateTime.Now.ToShortDateString());
                 zeile += DateTime.Now.ToShortDateString() + ";";
-                FindAndReplace(wordApp, "<betreff>", art == "G" ? "Gefährdung der Versetzung" : "Mitteilung über den Leistungsstand");
+                FindAndReplace(wordApp, doc,"<betreff>", art == "G" ? "Gefährdung der Versetzung" : "Mitteilung über den Leistungsstand");
                 zeile += art == "G" ? "Gefährdung der Versetzung" : "Mitteilung über den Leistungsstand" + ";";
-                FindAndReplace(wordApp, "<absatz1>", GetAbsatz1(art));
+                FindAndReplace(wordApp, doc,"<absatz1>", GetAbsatz1(art));
                 zeile += GetAbsatz1(art) + ";";
-                FindAndReplace(wordApp, "<fächer>", RenderFächer());
+                FindAndReplace(wordApp, doc,"<fächer>", RenderFächer());
                 zeile += RenderFächer() + ";";
-                FindAndReplace(wordApp, "<absatz2>", GetAbsatz2(art));
+                FindAndReplace(wordApp, doc,"<absatz2>", GetAbsatz2(art));
                 zeile += GetAbsatz2(art) + ";";
-                FindAndReplace(wordApp, "<absatz3>", GetAbsatz3());
+                FindAndReplace(wordApp, doc,"<absatz3>", GetAbsatz3());
                 zeile += GetAbsatz3() + ";";
-                FindAndReplace(wordApp, "<klassenleitung>", Klassenleitung);
+                FindAndReplace(wordApp, doc,"<klassenleitung>", Klassenleitung);
                 zeile += Klassenleitung + ";";
-                FindAndReplace(wordApp, "<klassenlehrerIn>", KlassenleitungMw == "Herr" ? "Klassenlehrer" : "Klassenlehrerin");
+                FindAndReplace(wordApp, doc,"<klassenlehrerIn>", KlassenleitungMw == "Herr" ? "Klassenlehrer" : "Klassenlehrerin");
                 zeile += (KlassenleitungMw == "Herr" ? "Klassenlehrer" : "Klassenlehrerin") + ";";
 
-                Protokoll += "</td>";
-
-                FindAndReplace(wordApp, "<hinweis>", GetHinweis());
+                FindAndReplace(wordApp, doc,"<hinweis>", GetHinweis());
                 zeile += GetHinweis() + ";";
-                FindAndReplace(wordApp, "<footer>", footer);
+                FindAndReplace(wordApp, doc,"<footer>", "");
                 
                 doc.ExportAsFixedFormat(fileName+".pdf", WdExportFormat.wdExportFormatPDF, false, WdExportOptimizeFor.wdExportOptimizeForOnScreen,
                     WdExportRange.wdExportAllDocument, 1, 1, WdExportItem.wdExportDocumentContent, true, true,
@@ -181,6 +162,14 @@ namespace webuntis2BlaueBriefe
                 GC.Collect();
                 wordApp.Quit();
                 Global.Zeilen.Add(zeile);
+            }
+            if (art == "G")
+            {
+                Console.WriteLine("Gefährdung");
+            }
+            else
+            {
+                Console.WriteLine("Mitteilung über den Leistungsstand");
             }
         }
 
@@ -203,9 +192,9 @@ namespace webuntis2BlaueBriefe
         {
             string x = "Neu hinzukommende Gefährdung: ";
                         
-            foreach (var item in (from f in Fachs where f.NeuesDefizit select f).ToList())
+            foreach (var item in (from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).ToList())
             {
-                x += " " + item.KürzelUntis + "(" + (from g in Global.Noten where item.NoteJetzt == g.Stufe select g.Klartext).FirstOrDefault() + "),";
+                //x += " " + item.KürzelUntis + "(" + (from g in Global.Noten where item.NoteJetzt == g.Stufe select g.Klartext).FirstOrDefault() + "),";
             }
             return x.TrimEnd(',');
         }
@@ -219,11 +208,11 @@ namespace webuntis2BlaueBriefe
         {
             if (art == "G")
             {
-                return "abweichend von " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "den" : "der") + " im letzten Zeugnis erteilten Note" + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "n" : "") + " nicht mehr " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "ausreichen" : "ausreicht") + ".";
+                return "abweichend von " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "den" : "der") + " im letzten Zeugnis erteilten Note" + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "n" : "") + " nicht mehr " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "ausreichen" : "ausreicht") + ".";
             }
             else
             {
-                return "abweichend von " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "den" : "der") + " im letzten Zeugnis erteilten Note" + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "n" : "") + " nicht mehr " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "ausreichen" : "ausreicht") + ". Stellt sich eine weitere nicht ausreichende Leistung ein, ist die Versetzung gefährdet.";
+                return "abweichend von " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "den" : "der") + " im letzten Zeugnis erteilten Note" + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "n" : "") + " nicht mehr " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "ausreichen" : "ausreicht") + ". Stellt sich eine weitere nicht ausreichende Leistung ein, ist die Versetzung gefährdet.";
             }            
         }
 
@@ -233,133 +222,133 @@ namespace webuntis2BlaueBriefe
             {
                 if (Geschlecht.ToLower() == "m")
                 {
-                    return "Sie werden darüber unterrichtet, dass die Leistung" + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "en" : "") + " Ihres Sohnes " + Vorname + ", Klasse " + Klasse + ", in " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "den Fächern" : "dem Fach");
+                    return "Sie werden darüber unterrichtet, dass die Leistung" + ((from d in DefizitäreLeistungen where d.NeueDefizitLeistung select d).Count() > 1 ? "en" : "") + " Ihres Sohnes " + Vorname + ", Klasse " + Klasse + ", in " + ((from d in DefizitäreLeistungen where d.NeueDefizitLeistung select d).Count() > 1 ? "den Fächern" : "dem Fach");
                 }
                 else
                 {
-                    return "Sie werden darüber unterrichtet, dass die Leistung" + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "en" : "") + " Ihrer Tochter " + Vorname + ", Klasse " + Klasse + ", in " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "den Fächern" : "dem Fach");
+                    return "Sie werden darüber unterrichtet, dass die Leistung" + ((from d in DefizitäreLeistungen where d.NeueDefizitLeistung select d).Count() > 1 ? "en" : "") + " Ihrer Tochter " + Vorname + ", Klasse " + Klasse + ", in " + ((from d in DefizitäreLeistungen where d.NeueDefizitLeistung select d).Count() > 1 ? "den Fächern" : "dem Fach");
                 }
             }
             else
             {
-                return "Sie werden darüber unterrichtet, dass Ihre Leistung" + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "en" : "") + " in " + ((from f in Fachs where f.NeuesDefizit select f).Count() > 1 ? "den Fächern" : "dem Fach");
+                return "Sie werden darüber unterrichtet, dass Ihre Leistung" + ((from d in DefizitäreLeistungen where d.NeueDefizitLeistung select d).Count() > 1 ? "en" : "") + " in " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "den Fächern" : "dem Fach");
             }
         }
+
         internal void RenderBrief(string folder)
         {
-            string footer = (Volljaehrig ? "Vollj.;" : "Minderj.;" ) + Klasse + ";" + Nachname + "," + Vorname + "; HZ: " + RenderNotenHz() + "; Jetzt: " + RenderNotenJetzt() + "; ";
+            string footer = "";// (Volljaehrig ? "Vollj.;" : "Minderj.;" ) + Klasse + ";" + Nachname + "," + Vorname + "; HZ: " + RenderNotenHz() + "; Jetzt: " + RenderNotenJetzt() + "; ";
             Console.Write(footer, folder);
-            
-            Protokoll = "<td>" + Nachname + ", " + Vorname + "</td><td>" + (Volljaehrig ? "J" : "N") + "</td><td>" + RenderNotenHz() + "</td><td>" + RenderNotenJetzt() + "</td>";
+            Console.Write(Klasse + ";" + Nachname + ";" + Vorname + ";");
 
-            if ((from f in Fachs
-                 where Global.Mangelhaft.Contains(f.NoteHalbjahr)                
+            if ((from f in DefizitäreLeistungen
+                 where f.NoteHalbjahr == 5                
                  select f).Count() == 0)
             {
-                if ((from f in Fachs
-                     where Global.Ungenügend.Contains(f.NoteHalbjahr)
+                if ((from f in DefizitäreLeistungen
+                     where f.NoteHalbjahr == 6
                      select f).Count() == 0)
                 {
                     // HZ: kein Defizit; jetzt eine 5: Mitteilung über Leistungsstand
 
-                    if ((from f in Fachs
-                         where Global.Mangelhaft.Contains(f.NoteJetzt)
+                    if ((from f in DefizitäreLeistungen
+                         where f.NoteJetzt == 5
                          select f).Count() == 1)
                     {
-                        if ((from f in Fachs
-                             where Global.Ungenügend.Contains(f.NoteJetzt)
+                        if ((from f in DefizitäreLeistungen
+                             where f.NoteJetzt == 6
                              select f).Count() == 0)
                         {
-                            RenderMitteilung("M", footer, folder);
+                            //RenderMitteilung("M", footer, folder);
                         }
                     }
 
                     // HZ kein Defizit; jetzt zwei oder mehr 5: Gefährdung
 
-                   if ((from f in Fachs
-                         where Global.Mangelhaft.Contains(f.NoteJetzt)
+                   if ((from f in DefizitäreLeistungen
+                         where f.NoteJetzt == 5
                          select f).Count() > 1)
                     {
-                        if ((from f in Fachs
-                             where Global.Ungenügend.Contains(f.NoteJetzt)
+                        if ((from f in DefizitäreLeistungen
+                             where f.NoteJetzt == 6
                              select f).Count() == 0)
                         {
-                            RenderMitteilung("G", footer, folder);
+                            //RenderMitteilung("G", footer, folder);
                         }
                     }
 
                     // HZ: kein Defizit; jetzt eine 6 oder mehr: Gefährdung
 
-                    if ((from f in Fachs
-                         where Global.Ungenügend.Contains(f.NoteJetzt)
+                    if ((from f in DefizitäreLeistungen
+                         where f.NoteJetzt == 6
                          select f).Count() > 0)
                     {
-                        RenderMitteilung("G", footer, folder);
+                        //RenderMitteilung("G", footer, folder);
                     }
                 }   
             }
             
             // HZ eine 5; jetzt eine oder mehrere zusätzliche 5en: Gefährdung
             
-            if ((from f in Fachs
-                 where Global.Mangelhaft.Contains(f.NoteHalbjahr)
+            if ((from f in DefizitäreLeistungen
+                 where f.NoteJetzt == 5
                  select f).Count() == 1)
             {                
-                if ((from f in Fachs
-                     where Global.Ungenügend.Contains(f.NoteHalbjahr)
+                if ((from f in DefizitäreLeistungen
+                     where f.NoteJetzt == 6
                      select f).Count() == 0)
                 {
-                    if ((from f in Fachs
-                         where Global.Ungenügend.Contains(f.NoteHalbjahr)
+                    if ((from f in DefizitäreLeistungen
+                         where f.NoteJetzt == 6
                          select f).Count() == 0)
                     {
-                        if ((from f in Fachs
-                             where Global.Mangelhaft.Contains(f.NoteJetzt)
-                             select f).Count() > (from f in Fachs
-                                                  where Global.Mangelhaft.Contains(f.NoteHalbjahr)
+                        if ((from f in DefizitäreLeistungen
+                             where f.NoteJetzt == 5
+                             select f).Count() > (from f in DefizitäreLeistungen
+                                                  where f.NoteJetzt == 5
                                                   select f).Count())
                         {
-                            RenderMitteilung("G", footer, folder);
+                            //RenderMitteilung("G", footer, folder);
                         }
                     }
                 }
                 
                 // HZ eine 5; jetzt eine oder mehrere zusätzliche 6en: Gefährdung
                 
-                if ((from f in Fachs
-                     where Global.Ungenügend.Contains(f.NoteJetzt)
-                     select f).Count() > (from f in Fachs
-                                          where Global.Ungenügend.Contains(f.NoteHalbjahr)
+                if ((from f in DefizitäreLeistungen
+                     where f.NoteJetzt == 6
+                     select f).Count() > (from f in DefizitäreLeistungen
+                                          where f.NoteJetzt == 6
                                           select f).Count())
                 {
-                    RenderMitteilung("G", footer, folder);                    
+                    //RenderMitteilung("G", footer, folder);                    
                 }
             }
 
             // HZ: Zwei oder mehr 5er oder eine 6. Jetzt eine oder mehrere zusätzliche 5 oder 6: Gefährdung
 
-            if ((from f in Fachs where Global.Ungenügend.Contains(f.NoteHalbjahr) select f).Count() >= 1 ||
-                (from f in Fachs where Global.Mangelhaft.Contains(f.NoteHalbjahr) select f).Count() > 1)
+            if ((from f in DefizitäreLeistungen where f.NoteJetzt == 6 select f).Count() >= 1 ||
+                (from f in DefizitäreLeistungen where f.NoteJetzt == 5 select f).Count() > 1)
             {
-                var anzahlHzDefizite5 = (from f in Fachs
-                                        where Global.Mangelhaft.Contains(f.NoteHalbjahr)
+                var anzahlHzDefizite5 = (from f in DefizitäreLeistungen
+                                        where f.NoteHalbjahr == 5
                                         select f).Count();
 
-                var anzahlJetztDefizite5 = (from f in Fachs
-                                           where Global.Mangelhaft.Contains(f.NoteJetzt)
+                var anzahlJetztDefizite5 = (from f in DefizitäreLeistungen
+                                           where f.NoteJetzt == 5
                                            select f).Count();
 
-                var anzahlHzDefizite6 = (from f in Fachs
-                                        where Global.Ungenügend.Contains(f.NoteHalbjahr) 
+                var anzahlHzDefizite6 = (from f in DefizitäreLeistungen
+                                        where f.NoteHalbjahr == 6 
                                         select f).Count();
 
-                var anzahlJetztDefizite6 = (from f in Fachs
-                                           where Global.Ungenügend.Contains(f.NoteJetzt) 
+                var anzahlJetztDefizite6 = (from f in DefizitäreLeistungen
+                                           where f.NoteJetzt == 6 
                                            select f).Count();
 
                 if (anzahlJetztDefizite5 > anzahlHzDefizite5 || anzahlJetztDefizite6 > anzahlHzDefizite6)
                 {
-                    RenderMitteilung("G", footer, folder);             
+                    //RenderMitteilung("G", footer, folder);             
                 }
                 //Abschlussklasse erhalten keine Benachrichtigung
             }
@@ -370,9 +359,9 @@ namespace webuntis2BlaueBriefe
         {
             string x = "";
 
-            if((from f in Fachs
-                                  where Global.Mangelhaft.Contains(f.NoteHalbjahr) 
-                                  || Global.Ungenügend.Contains(f.NoteHalbjahr)
+            if((from f in DefizitäreLeistungen
+                                  where f.NoteHalbjahr == 5 
+                                  || f.NoteHalbjahr == 6
                                   select f).Count()  == 0)
             {
                 x = "";                
@@ -380,23 +369,23 @@ namespace webuntis2BlaueBriefe
 
             x += "";
 
-            foreach (var item in Fachs)
+            foreach (var item in DefizitäreLeistungen)
             {
-                x += " " + item.KürzelUntis + "(" + (from g in Global.Noten where item.NoteHalbjahr == g.Stufe select g.Klartext).FirstOrDefault() + "),";
+                x += " " + item.Fach + "(" + item.NoteHalbjahr + "),";
             }
             return x.TrimEnd(',');
         }
 
-        private string RenderNotenJetzt()
-        {
-            string x = "";
+        //private string RenderNotenJetzt()
+        //{
+        //    string x = "";
 
-            foreach (var item in Fachs)
-            {
-                x += " " + item.KürzelUntis + "(" + (from g in Global.Noten where item.NoteJetzt == g.Stufe select g.Klartext).FirstOrDefault() + "),";
-            }
-            return x.TrimEnd(',');
-        }
+        //    foreach (var item in Fachs)
+        //    {
+        //        x += " " + item.KürzelUntis + "(" + (from g in Global.Noten where item.NoteJetzt == g.Stufe select g.Klartext).FirstOrDefault() + "),";
+        //    }
+        //    return x.TrimEnd(',');
+        //}
 
         private object GetIhreTochterIhrSohn()
         {
@@ -460,14 +449,43 @@ Leistung";
         {
             string x = "";
 
-            foreach (var fach in (from f in Fachs where f.NeuesDefizit select f).ToList())
+            foreach (var dl in (from d in DefizitäreLeistungen where d.NeueDefizitLeistung select d).ToList())
             {
-                x += " " + fach.BezeichnungImZeugnis + " (" + (Global.Mangelhaft.Contains(fach.NoteJetzt) ? "mangelhaft":"") + (Global.Ungenügend.Contains(fach.NoteJetzt) ? "ungenügend" : "") + ")\r\n";
+                x += " " + dl.BezeichnungImZeugnis + " (" + NoteKlartext(dl.NoteJetzt) + ")\r\n";
             }
             return x.Replace(" **)","");
         }
-        
-        private static void FindAndReplace(Application doc, object findText, object replaceWithText)
+
+        private string NoteKlartext(int noteJetzt)
+        {
+            if (noteJetzt == 6)
+            {
+                return "ungenügend";
+            }
+            if (noteJetzt == 5)
+            {
+                return "mangelhaft";
+            }
+            if (noteJetzt == 4)
+            {
+                return "ausreichend";
+            }
+            if (noteJetzt == 3)
+            {
+                return "befriedigend";
+            }
+            if (noteJetzt == 2)
+            {
+                return "gut";
+            }
+            if (noteJetzt == 1)
+            {
+                return "sehr gut";
+            }
+            return "fehler";
+        }
+
+        private static void FindAndReplace(Application app, Document doc, object findText, object replaceWithText)
         {
             //options
             object matchCase = false;
@@ -488,53 +506,70 @@ Leistung";
             //execute find and replace
             try
             {
-                doc.Selection.Find.Execute(ref findText, ref matchCase, ref matchWholeWord,
-                ref matchWildCards, ref matchSoundsLike, ref matchAllWordForms, ref forward, ref wrap, ref format, ref replaceWithText, ref replace,
-                ref matchKashida, ref matchDiacritics, ref matchAlefHamza, ref matchControl);
+                // Der neue Text darf nur 255 Zeichen lang sein.
+
+                if (replaceWithText.ToString().Length < 255)
+                {
+                    app.Selection.Find.Execute(ref findText, ref matchCase, ref matchWholeWord,
+                    ref matchWildCards, ref matchSoundsLike, ref matchAllWordForms, ref forward, ref wrap, ref format, ref replaceWithText, ref replace,
+                    ref matchKashida, ref matchDiacritics, ref matchAlefHamza, ref matchControl);
+                }
+                else
+                {
+                    object empty = "";
+                    Bookmark bm = doc.Bookmarks["faecher"];
+                    Range range = bm.Range;
+                    range.Text = replaceWithText.ToString();
+                    doc.Bookmarks.Add("faecher", range);
+                    app.Selection.Find.Execute(ref findText, ref matchCase, ref matchWholeWord,
+                    ref matchWildCards, ref matchSoundsLike, ref matchAllWordForms, ref forward, ref wrap, ref format, ref empty, ref replace,
+                    ref matchKashida, ref matchDiacritics, ref matchAlefHamza, ref matchControl);
+                }
             }
             catch (Exception ex)
-            {
+            {                
                 Console.WriteLine(ex);
                 Console.ReadKey();
             }
         }
 
-        internal void GetDefizitfächer(DefizitäreLeistungen defizitäreLeistungen, Fachs fachs)
-        {
-            Fachs fachss = new Fachs();
+        //internal void GetDefizitfächer(DefizitäreLeistungen defizitäreLeistungen, DefizitäreLeistungen defizitäreAtlantisLeistungen, Fachs fachs)
+        //{
+        //    Fachs fachss = new Fachs();
 
-            // Suche alle defizitären Fächer dieses Schülers
+        //    // Suche alle defizitären Fächer dieses Schülers
             
-            var defizitäreFächerDiesesSchülers = (from d in defizitäreLeistungen
-                                                  where d.SchlüsselExtern == IdAtlantis
-                                                  where Global.BlaueBriefe.Contains(d.Prüfungsart)
-                                                  select d.Fach.KürzelUntis).Distinct().ToList();
+        //    var defizitäreFächerDiesesSchülers = (from d in defizitäreLeistungen
+        //                                          where d.SchlüsselExtern == IdAtlantis
+        //                                          where Global.BlaueBriefe.Contains(d.Prüfungsart)
+        //                                          //where !d.Fach.BezeichnungImZeugnis.Contains("Förder")
+        //                                          select d.Fach.KürzelUntis).Distinct().ToList();
 
-            var noteJetzt = "";
-            var noteHalbjahr = "";
+        //    var noteJetzt = "";
+        //    var noteHalbjahr = "";
 
-            foreach (var dFach in defizitäreFächerDiesesSchülers)
-            {
-                foreach (var d in defizitäreLeistungen)
-                {
-                    if (d.SchlüsselExtern == IdAtlantis)
-                    {
-                        if (d.Fach.KürzelUntis == dFach)
-                        {
-                            if (d.Prüfungsart.Contains("laue"))
-                            {
-                                noteJetzt = d.BlauerBriefNote;
-                                noteHalbjahr = d.Halbjahresgesamtnote;
-                            }                            
-                        }
-                    }
-                }
+        //    foreach (var dFach in defizitäreFächerDiesesSchülers)
+        //    {
+        //        foreach (var d in defizitäreLeistungen)
+        //        {
+        //            if (d.SchlüsselExtern == IdAtlantis)
+        //            {
+        //                if (d.Fach.KürzelUntis == dFach)
+        //                {
+        //                    if (d.Prüfungsart.Contains("laue"))
+        //                    {
+        //                        noteJetzt = d.BlauerBriefNote;
+        //                        noteHalbjahr = d.GetNoteHalbjahr(defizitäreAtlantisLeistungen);
+        //                    }                            
+        //                }
+        //            }
+        //        }
                 
-                if (noteJetzt != null)
-                {
-                    this.Fachs.Add(new Fach(dFach, (from f in fachs where f.KürzelUntis == dFach select f.BezeichnungImZeugnis).FirstOrDefault(), noteJetzt, noteHalbjahr));
-                }
-            }
-        }
+        //        if (noteJetzt != null)
+        //        {
+        //            this.Fachs.Add(new Fach(dFach, (from f in fachs where f.KürzelUntis == dFach select f.BezeichnungImZeugnis).FirstOrDefault(), noteJetzt, noteHalbjahr));
+        //        }
+        //    }
+        //}
     }
 }

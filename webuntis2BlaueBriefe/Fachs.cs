@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace webuntis2BlaueBriefe
 {
@@ -10,7 +11,7 @@ namespace webuntis2BlaueBriefe
         {
         }
 
-        public Fachs(string connectionStringUntis)
+        public Fachs(string connectionStringUntis, DefizitäreLeistungen dlw)
         {
             using (SqlConnection sqlConnection = new SqlConnection(Global.ConnectionStringUntis))
             {
@@ -37,7 +38,10 @@ namespace webuntis2BlaueBriefe
                             LangnameUntis = SafeGetString(sqlDataReader, 2).ToString(),
                             BezeichnungImZeugnis = SafeGetString(sqlDataReader, 3).ToString()                            
                         };
-                        this.Add(fach);
+                        if ((from d in dlw where d.Fach == fach.KürzelUntis select d).Any())
+                        {
+                            this.Add(fach);
+                        }
                     };
 
                     sqlDataReader.Close();
@@ -52,6 +56,7 @@ namespace webuntis2BlaueBriefe
                     sqlConnection.Close();
                 }
             }
+            Console.WriteLine(("Betroffene Fächer " + ".".PadRight(this.Count / 150, '.')).PadRight(48, '.') + (" " + this.Count).ToString().PadLeft(4), '.');
         }
                 
         private object SafeGetString(SqlDataReader reader, int colIndex)

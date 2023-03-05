@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace webuntis2BlaueBriefe
 {
@@ -8,13 +9,13 @@ namespace webuntis2BlaueBriefe
         {
         }
 
-        public Fach(string kürzelUntis, string bezeichnungImZeugnis, string noteJetzt, string noteHalbjahr)
+        public Fach(string kürzelUntis, string bezeichnungImZeugnis, int noteJetzt, int noteHalbjahr)
         {
             KürzelUntis = kürzelUntis;
             BezeichnungImZeugnis = bezeichnungImZeugnis;
             NoteJetzt = noteJetzt;
             NoteHalbjahr = noteHalbjahr;
-            NeuesDefizit = (from g in Global.Noten where g.Stufe == noteHalbjahr select g.Klartext).FirstOrDefault() == (from g in Global.Noten where g.Stufe == noteJetzt select g.Klartext).FirstOrDefault() ? false : true;  
+            //NeuesDefizit = (from g in Global.Noten where g.Stufe == noteHalbjahr.ToString() select g.Klartext).FirstOrDefault() == (from g in Global.Noten where g.Stufe == noteJetzt select g.Klartext).FirstOrDefault() ? false : true;  
 
         }
 
@@ -23,8 +24,9 @@ namespace webuntis2BlaueBriefe
         public string LangnameUntis { get; set; }
         public string BezeichnungImZeugnis { get; set; }
         public string Statistikname { get; set; }
-        public string NoteHalbjahr { get; internal set; }
-        public string NoteJetzt { get; internal set; }
-        public bool NeuesDefizit { get; private set; }
+        public int NoteHalbjahr { get; internal set; }
+        public int NoteJetzt { get; internal set; }
+        public bool NeuHinzugekommenesDefizitFach { get; internal set; }
+        public bool NochmaligeVerschlechterungAuf6 { get; internal set; }
     }
 }

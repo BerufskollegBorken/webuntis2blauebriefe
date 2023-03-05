@@ -14,14 +14,16 @@ using System.Text;
 namespace webuntis2BlaueBriefe
 {
     internal class Schuelers : List<Schueler>
-    {        
+    {
         public Schuelers()
         {
         }
 
-        public Schuelers(DefizitäreLeistungen defizitäreLeistungen, Klasses klasses, Lehrers lehrers, Fachs fachs)
+        public Schuelers(DefizitäreLeistungen defizitäreWebuntisLeistungen, DefizitäreLeistungen defizitäreAtlantisLeistungen, Klasses klasses, Lehrers lehrers, Fachs fachs)
         {
-            foreach (var idAtlantis in (from t in defizitäreLeistungen select t.SchlüsselExtern).Distinct().ToList())
+            foreach (var idAtlantis in (from t in defizitäreWebuntisLeistungen
+                                        where t.Prüfungsart.StartsWith("Mahnung")
+                                        select t.SchlüsselExtern).Distinct().ToList())
             {
                 using (OdbcConnection connection = new OdbcConnection(Global.ConnectionStringAtlantis))
                 {
@@ -78,25 +80,25 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                             var sorgeberechtigtJn = reader.GetValue(13).ToString();
                             var anrede = reader.GetValue(14).ToString();
                             var typ = reader.GetValue(2).ToString();
-                            
+
                             if (sorgeberechtigtJn == "N" && typ == "0")
                             {
                                 schueler.Vorname = reader.GetValue(5).ToString();
                                 schueler.Nachname = reader.GetValue(4).ToString();
                                 schueler.Strasse = reader.GetValue(10).ToString();
                                 schueler.Plz = reader.GetValue(11).ToString();
-                                schueler.Ort = reader.GetValue(12).ToString();                                
+                                schueler.Ort = reader.GetValue(12).ToString();
                                 schueler.Geburtsdatum = DateTime.ParseExact(reader.GetValue(8).ToString(), "dd.MM.yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
                                 schueler.Volljaehrig = schueler.Geburtsdatum.AddYears(18) > DateTime.Now ? false : true;
-                                schueler.Geschlecht = reader.GetValue(9).ToString();                                
+                                schueler.Geschlecht = reader.GetValue(9).ToString();
                                 schueler.Jahrgang = reader.GetValue(1).ToString();
                                 schueler.Anrede = anrede;
                                 schueler.Typ = reader.GetValue(2).ToString(); // 0 = Schüler V = Vater  M = Mutter
                                 schueler.Klasse = reader.GetValue(3).ToString();
-                                schueler.Fachs = new Fachs();
                                 schueler.Klassenleitung = (from k in klasses where k.NameUntis == schueler.Klasse select k.Klassenleitungen[0].Vorname + " " + k.Klassenleitungen[0].Nachname).FirstOrDefault();
                                 schueler.KlassenleitungMail = (from k in klasses where k.NameUntis == schueler.Klasse select k.Klassenleitungen[0].Mail).FirstOrDefault();
                                 schueler.KlassenleitungMw = (from l in lehrers where l.Vorname + " " + l.Nachname == schueler.Klassenleitung select l.Anrede).FirstOrDefault();
+
                             }
 
                             if (sorgeberechtigtJn == "J" && anrede == "H")
@@ -106,7 +108,7 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                                 var strasse = reader.GetValue(10).ToString();
                                 var plz = reader.GetValue(11).ToString();
                                 var ort = reader.GetValue(12).ToString();
-                                schueler.Sorgeberechtigte.Add(new Sorgeberechtigt(vorname, nachname, strasse, plz, ort));                                
+                                schueler.Sorgeberechtigte.Add(new Sorgeberechtigt(vorname, nachname, strasse, plz, ort));
                             }
 
                             if (sorgeberechtigtJn == "J" && anrede == "F")
@@ -120,122 +122,64 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                             }
                         }
 
-                        schueler.GetDefizitfächer(defizitäreLeistungen, fachs);
+                        schueler.DefizitäreLeistungen = new DefizitäreLeistungen();
+
+                        // Defizitäre Leistungen kommen aus Webuntis ...
+
+                        foreach (var wl in (from t in defizitäreWebuntisLeistungen
+                                              where t.Prüfungsart.StartsWith("Mahnung")
+                                              where t.SchlüsselExtern == schueler.IdAtlantis
+                                              select t).ToList())
+                        {
+                            var al = defizitäreAtlantisLeistungen.GetKorrespondierendeAtlantisLeistung(wl);
+
+                            wl.NoteHalbjahr = al.NoteHalbjahr;
+                            wl.BezeichnungImZeugnis = al.BezeichnungImZeugnis;
+                            wl.NeueDefizitLeistung = wl.NoteHalbjahr <= 4 && wl.NoteJetzt >= 5 ? true : false;
+                            schueler.DefizitäreLeistungen.Add(wl);
+                        }
+
+                        // ... oder aus Atlantis 
+
+                        foreach (var al in (from t in defizitäreAtlantisLeistungen
+                                            where t.NoteHalbjahr >= 5
+                                            where t.SchlüsselExtern == schueler.IdAtlantis
+                                            select t).ToList())
+                        {
+                            if (!(from s in schueler.DefizitäreLeistungen where s.Fach == al.Fach select s).Any())
+                            {
+                                al.NoteJetzt = 4;
+                                al.NeueDefizitLeistung = al.NoteHalbjahr <= 4 && al.NoteJetzt >= 5 ? true : false;                                
+                                schueler.DefizitäreLeistungen.Add(al);
+                            }
+                        }
+
+
                         schueler.Dateien = new List<string>();
-                        if (schueler.Fachs.Count > 0)
+
+                        if (schueler.DefizitäreLeistungen.Count > 0)
                         {
                             this.Add(schueler);
                         }
+
                         reader.Close();
-                        command.Dispose();                        
+                        command.Dispose();
                     }
-                }                
-            }
-            Console.WriteLine(("Schüler mit Defiziten " + ".".PadRight(this.Count / 150, '.')).PadRight(48, '.') + (" " + this.Count).ToString().PadLeft(4), '.');
-        }
-
-        internal void MailAnKlassenlehrer()
-        {
-            foreach (var klasse in (from s in this select s.Klasse).Distinct())
-            {
-                var schülerDieserKlasse = (from s in this
-                                           where s.Klasse == klasse
-                                           select s).OrderBy(x => x.Nachname).ThenBy(x => x.Vorname).ToList();
-
-                Mail(schülerDieserKlasse);
-            }
-        }
-
-        private void Mail(List<Schueler> schülerDieserKlasse)
-        {
-            MailMessage message = new MailMessage("stefan.baeumer@berufskolleg-borken.de", "stefan.baeumer@berufskolleg-borken.de");
-            var ss = Console.ReadLine();
-            
-            String password = ss;
-                        
-            try
-            {
-                String userName = "stefan.baeumer@berufskolleg-borken.de";                
-                MailMessage msg = new MailMessage();
-                msg.To.Add(new MailAddress("stefan.baeumer@berufskolleg-borken.de"));
-                msg.From = new MailAddress(userName);
-                msg.Subject = "Test Office 365 Account";
-                msg.Body = "Testing email using Office 365 account.";
-                msg.IsBodyHtml = true;
-
-                using (SmtpClient client = new SmtpClient
-                {
-                    Host = "smtp.office365.com",
-                    Credentials = new System.Net.NetworkCredential(userName, password),
-                    Port = 587,
-                    EnableSsl = true,
-                })
-                {
-                    client.Send(msg);
                 }
             }
-            catch (Exception ex)
-            {
-                Console.Write(ex.Message);
-                Console.ReadKey();
-            }
-
-            ExchangeService exchangeService = new ExchangeService(ExchangeVersion.Exchange2010_SP1);
-
-            //exchangeService.UseDefaultCredentials = true;
-            //exchangeService.TraceEnabled = false;
-            //exchangeService.TraceFlags = TraceFlags.All;
-            //exchangeService.Url = new Uri("https://outlook.office365.com/EWS/Exchange.asmx");
-
-            //EmailMessage message = new EmailMessage(exchangeService);
-
-            //message.ToRecipients.Add("stefan.baeumer@berufskolleg-borken.de");
-
-            //foreach (var s in schülerDieserKlasse)
-            //{
-            //    foreach (var datei in s.Dateien)
-            //    {
-            //        message.Attachments.AddFileAttachment(datei);
-            //    }
-            //}
-                 
-            //message.Subject = "Blaue Briefe - BITTE KONTROLLIEREN";
-
-            //message.Body = @"Guten Tag " + schülerDieserKlasse[0].Klassenleitung + "," +
-            //    "<br><br>Sie erhalten diese Mail in Ihrer Eigenschaft als Klassenleitung der Klasse " + schülerDieserKlasse[0].Klasse + "." +
-            //    "<br><br>" +
-            //    "Bitte prüfen Sie die im Folgenden automatisch erstellten und aufgelisteten Blauen Briefe gewissenhaft. Die Verantwortung für die Richtigkeit liegt ganz allein bei Ihnen. Achten Sie beispielsweise darauf, dass kein Fach des Differenzierungsbereichs angemahnt wird.</br>" +
-            //    "<br><table border = 1><tr><td>Name</td><td>Vollj.</td><td>Halbjahreszeugnis</td><td>Aktueller Notenstand<br> aller abweichenden <br>Fächer</td><td>Gefährdung / Mitteilung Leistungsstand</td><td>Anschrift(en)</td></tr>";
-
-            //foreach (var s in schülerDieserKlasse)
-            //{
-            //    message.Body += "<tr>" + s.Protokoll + "</tr>";
-            //}
-
-            //message.Body += "</table></br>" +
-            //    "Wenn Sie sich nicht zeitnah zurückmelden, bestätigen damit die Richtigkeit. Die Briefe werden dann alsbald verschickt." +
-            //    "</br></br>" +
-            //    "Stefan Bäumer" +
-            //    "";
-
-            //message.Save(WellKnownFolderName.Drafts);
-            ////message.SendAndSaveCopy();
-            
-            //Console.WriteLine(schülerDieserKlasse[0].Klasse + " " + schülerDieserKlasse[0].Klassenleitung  + ": Mail gesendet.");
+            Console.WriteLine(("Schüler mit Defiziten " + ".".PadRight(this.Count / 150, '.')).PadRight(48, '.') + (" " + this.Count).ToString().PadLeft(4), '.');
         }
 
         internal void RenderBriefeUndSteuerdatei(string steuerdatei)
         {
             var folder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\BlaueBriefe-" + DateTime.Now.ToString("yyyyMMdd-hhmm");
 
-            //Console.WriteLine(this[0].Klasse + "\n" + "=".PadRight(this[0].Klasse.Length - 1, '='));
-
             foreach (var schueler in this)
             {
                 schueler.RenderBrief(folder);
             }
 
-            using (StreamWriter writer = new StreamWriter(steuerdatei , true, Encoding.Default))
+            using (StreamWriter writer = new StreamWriter(steuerdatei, true, Encoding.Default))
             {
                 foreach (var o in Global.Zeilen)
                 {
@@ -267,29 +211,10 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
         {
             Console.WriteLine(this[0].Klasse + "\n" + "=".PadRight(this[0].Klasse.Length - 1, '='));
 
-            
-
             foreach (var schueler in this)
             {
                 schueler.RenderBrief(folder);
             }
-        }
-
-
-        internal Schuelers FilterDefizitschüler(DefizitäreLeistungen defizitäreLeistungen, Fachs fachs)
-        {
-            Schuelers schuelersMitDefiziten = new Schuelers();
-
-            foreach (var schueler in this)
-            {                
-                schueler.GetDefizitfächer(defizitäreLeistungen, fachs);
-                                
-                if (schueler.Fachs.Count > 0)
-                {
-                    schuelersMitDefiziten.Add(schueler);
-                }
-            }
-            return schuelersMitDefiziten;
         }
     }
 }

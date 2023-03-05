@@ -9,7 +9,7 @@ namespace webuntis2BlaueBriefe
     {
         public Lehrers Lehrers { get; set; }
 
-        public Klasses(Lehrers lehrers, Periodes periodes, Stundentafels stundentafels)
+        public Klasses(Lehrers lehrers, Periodes periodes, DefizitäreLeistungen dlw)
         {
             Lehrers = lehrers;
 
@@ -55,13 +55,15 @@ WHERE (((Class.SCHOOL_ID)=177659) AND ((Class.TERM_ID)=" + periodes.Count + ") A
                             NameUntis = klasseName,
                             Klassenleitungen = klassenleitungen,
                             Jahrgang = Global.SafeGetString(sqlDataReader, 5),
-                            Stundentafel = (from s in stundentafels where s.IdUntis == sqlDataReader.GetInt32(6) select s).FirstOrDefault(),
                             Bereichsleitung = Global.SafeGetString(sqlDataReader, 7),
                             Beschreibung = Global.SafeGetString(sqlDataReader, 3),                            
                             Url = "https://www.berufskolleg-borken.de/bildungsgange/" + Global.SafeGetString(sqlDataReader, 10)
                         };
 
-                        this.Add(klasse);
+                        if ((from d in dlw where d.Klasse == klasse.NameUntis select d).Any())
+                        {
+                            this.Add(klasse);
+                        }
                     };
 
                     Console.WriteLine(("Klassen " + ".".PadRight(this.Count / 150, '.')).PadRight(48, '.') + (" " + this.Count).ToString().PadLeft(4), '.');
