@@ -39,6 +39,7 @@ namespace webuntis2BlaueBriefe
         public DateTime Konferenzdatum { get; internal set; }
         public bool NeueDefizitLeistung { get; internal set; }
         public bool NochmaligeVerschlechterungAuf6 { get; internal set; }
+        public string KlasseAtlantis { get; internal set; }
 
         internal bool IstKeinDiff(Klasses klasses)
         {

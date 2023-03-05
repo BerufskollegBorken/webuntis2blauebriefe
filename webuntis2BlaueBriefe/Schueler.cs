@@ -133,8 +133,8 @@ namespace webuntis2BlaueBriefe
                 zeile += Klasse + ";";
                 FindAndReplace(wordApp, doc,"<heute>", DateTime.Now.ToShortDateString());
                 zeile += DateTime.Now.ToShortDateString() + ";";
-                FindAndReplace(wordApp, doc,"<betreff>", art == "G" ? "Gefährdung der Versetzung" : "Mitteilung über den Leistungsstand");
-                zeile += art == "G" ? "Gefährdung der Versetzung" : "Mitteilung über den Leistungsstand" + ";";
+                FindAndReplace(wordApp, doc,"<betreff>", art == "M" ? "Mitteilung über den Leistungsstand" : "Gefährdung der Versetzung");
+                zeile += art == "M" ? "Mitteilung über den Leistungsstand" : "Gefährdung der Versetzung" + ";";
                 FindAndReplace(wordApp, doc,"<absatz1>", GetAbsatz1(art));
                 zeile += GetAbsatz1(art) + ";";
                 FindAndReplace(wordApp, doc,"<fächer>", RenderFächer());
@@ -163,13 +163,14 @@ namespace webuntis2BlaueBriefe
                 wordApp.Quit();
                 Global.Zeilen.Add(zeile);
             }
-            if (art == "G")
+            if (art == "M")
             {
-                Console.WriteLine("Gefährdung");
+                Console.WriteLine("Mitteilung über den Leistungsstand");
             }
             else
             {
-                Console.WriteLine("Mitteilung über den Leistungsstand");
+                Console.WriteLine("Gefährdung");
+                
             }
         }
 
@@ -205,15 +206,19 @@ namespace webuntis2BlaueBriefe
         }
 
         private object GetAbsatz2(string art)
-        {
+        {            
+            if(art == "M")
+            {
+                return "abweichend von " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "den" : "der") + " im letzten Zeugnis erteilten Note" + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "n" : "") + " nicht mehr " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "ausreichen" : "ausreicht") + ". Stellt sich eine weitere nicht ausreichende Leistung ein, ist die Versetzung gefährdet.";
+            }
             if (art == "G")
             {
                 return "abweichend von " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "den" : "der") + " im letzten Zeugnis erteilten Note" + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "n" : "") + " nicht mehr " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "ausreichen" : "ausreicht") + ".";
             }
             else
             {
-                return "abweichend von " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "den" : "der") + " im letzten Zeugnis erteilten Note" + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "n" : "") + " nicht mehr " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "ausreichen" : "ausreicht") + ". Stellt sich eine weitere nicht ausreichende Leistung ein, ist die Versetzung gefährdet.";
-            }            
+                return "abweichend von der im letzten Zeugnis erteilten Note nochmals verschlechtert hat.";
+            }
         }
 
         private object GetAbsatz1(string art)

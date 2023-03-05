@@ -33,13 +33,12 @@ namespace webuntis2BlaueBriefe
 
                 Periodes periodes = new Periodes();
                 Leistungen defizitäreWebuntisLeistungen = new Leistungen(sourceMarksPerLesson);
-                Fachs fachs = new Fachs(Global.ConnectionStringUntis, defizitäreWebuntisLeistungen);
                 Lehrers lehrers = new Lehrers(periodes);
                 Klasses klasses = new Klasses(lehrers, periodes, defizitäreWebuntisLeistungen);
                 
                 Leistungen atlantisLeistungen = new Leistungen(Global.ConnectionStringAtlantis, AktSj, defizitäreWebuntisLeistungen);
                 
-                Schuelers schuelerMitDefiziten = new Schuelers(defizitäreWebuntisLeistungen, atlantisLeistungen, klasses, lehrers, fachs);
+                Schuelers schuelerMitDefiziten = new Schuelers(defizitäreWebuntisLeistungen, atlantisLeistungen, klasses, lehrers);
 
                 foreach (var sd in schuelerMitDefiziten)
                 {
@@ -51,10 +50,11 @@ namespace webuntis2BlaueBriefe
                     var bereitsImHalbjahrGefährdet = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr >= 5 select s.NoteHalbjahr).Sum() >= 6 ? true : false;
                     var bereitsImHalbjahrEine5 = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr == 5 select s).Count() == 1 ? true : false;
                     var imHalbjahrKeinDefizit = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr >=5 select s.NoteHalbjahr).Any() ? false : true;
+                    var verschlechterungvon5auf6 = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr == 5 where s.NoteJetzt == 6 select s.NoteHalbjahr).Any() ? true : false;
 
                     Console.Write(sd.Nachname + "," + sd.Vorname + "," + (sd.Volljaehrig ? " Vollj. " : " Mindj. ") + " (" + sd.Klasse + "):");
 
-                    if (!nochWeitereDefiziteHinzugekommen)
+                    if (!nochWeitereDefiziteHinzugekommen && !verschlechterungvon5auf6)
                     {
                         Console.WriteLine("keine weiteren Defizite seit dem Halbjahr, keine Mitteilung.");
                     }
@@ -89,22 +89,30 @@ namespace webuntis2BlaueBriefe
 
                     if (bereitsImHalbjahrEine5 && nochWeitereDefiziteHinzugekommen)
                     {
-                        Console.Write("bereits im Halbjahr eine 5, jetzt eine o. mehrere zusätzliche 5en o. 6en,");
+                        Console.Write("bereits im Halbjahr eine 5; jetzt eine o. mehrere zusätzliche 5en o. 6en;");
                         sd.RenderMitteilung("G", Folder);
+                    }
+
+                    // HZ eine 5; jetzt Verschlechterung auf 6: Gefährdung
+
+                    if (bereitsImHalbjahrEine5 && verschlechterungvon5auf6 && !nochWeitereDefiziteHinzugekommen)
+                    {
+                        Console.Write("im Hj genau eine 5, also bisher nicht gefährdet; jetzt 6;");
+                        sd.RenderMitteilung("V", Folder);
                     }
 
                     // HZ: Zwei oder mehr 5en oder mindestens eine 6; jetzt eine oder zusätzliche 5en oder 6er: Gefährdung
 
                     if (bereitsImHalbjahrGefährdet && nochWeitereDefiziteHinzugekommen)
                     {
-                        Console.Write("bereits im Halbjahr gefährdet, jetzt eine o. mehrere zusätzliche 5en o. 6en,");
+                        Console.Write("bereits im Halbjahr gefährdet; jetzt eine o. mehrere zusätzliche 5en o. 6en;");
                         sd.RenderMitteilung("G", Folder);
                     } 
                 }
 
                 Console.WriteLine("");
                 Console.WriteLine("Verarbeitung beendet. ENTER");
-                Process.Start(Folder);
+                //Process.Start(Folder);
                 Console.ReadKey();
             }
             catch(IOException ex)

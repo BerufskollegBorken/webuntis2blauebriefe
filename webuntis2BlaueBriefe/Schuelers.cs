@@ -19,7 +19,7 @@ namespace webuntis2BlaueBriefe
         {
         }
 
-        public Schuelers(Leistungen defizitäreWebuntisLeistungen, Leistungen defizitäreAtlantisLeistungen, Klasses klasses, Lehrers lehrers, Fachs fachs)
+        public Schuelers(Leistungen defizitäreWebuntisLeistungen, Leistungen defizitäreAtlantisLeistungen, Klasses klasses, Lehrers lehrers)
         {
             foreach (var idAtlantis in (from t in defizitäreWebuntisLeistungen
                                         where t.Prüfungsart.StartsWith("Mahnung")
@@ -132,7 +132,7 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                                               select t).ToList())
                         {
                             var al = defizitäreAtlantisLeistungen.GetKorrespondierendeAtlantisLeistung(wl);
-
+                                                        
                             wl.NoteHalbjahr = al.NoteHalbjahr;
                             wl.BezeichnungImZeugnis = al.BezeichnungImZeugnis;
                             wl.NeueDefizitLeistung = wl.NoteHalbjahr <= 4 && wl.NoteJetzt >= 5 ? true : false;

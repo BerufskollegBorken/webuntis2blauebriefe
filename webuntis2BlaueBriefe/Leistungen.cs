@@ -101,6 +101,11 @@ namespace webuntis2BlaueBriefe
                     }
                 }
                 Console.WriteLine(("Defizitäre Webuntisleistungen " + ".".PadRight(this.Count / 150, '.')).PadRight(48, '.') + (" " + this.Count).ToString().PadLeft(4), '.');
+                if (this.Count == 0)
+                {
+                    Console.WriteLine("Keine einzige Leistung wurde aus Webuntis augelesen.");
+                    Console.ReadKey();
+                }
             }
         }
 
@@ -185,6 +190,9 @@ namespace webuntis2BlaueBriefe
 
             if (x.Count != 1)
             {
+                Console.WriteLine("");
+                Console.WriteLine("Die Leistung aus Webuntis (" + webuntisLeistung.Klasse + ", " + webuntisLeistung.Fach + ") kann keiner Atlantisleistung zugeordnet werden.");
+
                 bool wiederholen = true;
 
                 int index = 0;
@@ -200,7 +208,8 @@ namespace webuntis2BlaueBriefe
                                           where t.Klasse == webuntisLeistung.Klasse
                                           select t).ToList())
                     {
-                        Console.WriteLine(i + 1 + "." + item.Fach);
+                        Console.WriteLine(i + 1 + ". " + item.Klasse + "|" + item.Fach);
+                        i++;
                     }
 
                     Console.Write(" Bitte Zahl (0 = keine Zuordnung) 1 bis " + this.Count + " eingeben: ");
@@ -226,7 +235,8 @@ namespace webuntis2BlaueBriefe
                 }
                 else
                 {
-                    Console.WriteLine("Ihre Auswahl: " + webuntisLeistung.Fach + " wird " + this[index - 1] + " zugeordnet.");
+                    Console.WriteLine("Ihre Auswahl: " + webuntisLeistung.Fach + " wird " + this[index - 1].Fach + " zugeordnet.");
+                    this[index - 1].Fach = webuntisLeistung.Fach;
                     return this[index - 1];
                 }
             }
