@@ -46,8 +46,7 @@ namespace webuntis2BlaueBriefe
         public List<string> Dateien { get; set; }
 
         internal void RenderMitteilung(string art, string folder)
-        {
-            System.IO.Directory.CreateDirectory(folder);
+        {           
 
             // Für jede unterschiedliche Adresse
 
@@ -134,11 +133,11 @@ namespace webuntis2BlaueBriefe
             }
             if (art == "M")
             {
-                Console.WriteLine("Mitteilung über den Leistungsstand");
+                Global.Write(folder, " => Mitteilung über den Leistungsstand");
             }
             else
             {
-                Console.WriteLine("Gefährdung");
+                Global.Write(folder, "  => Gefährdung");
 
             }
         }

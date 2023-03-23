@@ -81,7 +81,7 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
 
                             if (sorgeberechtigtJn == "N" && typ == "0")
                             {
-                                schueler.Vorname = reader.GetValue(5).ToString();
+                                schueler.Vorname = reader.GetValue(5).ToString();                                
                                 schueler.Nachname = reader.GetValue(4).ToString();
                                 schueler.Strasse = reader.GetValue(10).ToString();
                                 schueler.Plz = reader.GetValue(11).ToString();
@@ -131,10 +131,16 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                         {
                             var al = defizitäreAtlantisLeistungen.GetKorrespondierendeAtlantisLeistung(wl);
 
-                            wl.NoteHalbjahr = al.NoteHalbjahr;
-                            wl.BezeichnungImZeugnis = al.BezeichnungImZeugnis;
-                            wl.NeueDefizitLeistung = wl.NoteHalbjahr <= 4 && wl.NoteJetzt >= 5 ? true : false;
-                            schueler.DefizitäreLeistungen.Add(wl);
+                            if (al != null)
+                            {
+                                wl.NoteHalbjahr = al.NoteHalbjahr;
+                                wl.BezeichnungImZeugnis = al.BezeichnungImZeugnis;
+                                wl.NeueDefizitLeistung = wl.NoteHalbjahr <= 4 && wl.NoteJetzt >= 5 ? true : false;
+                                if (!(from d in schueler.DefizitäreLeistungen where d.Fach == al.Fach where d.NoteHalbjahr == wl.NoteHalbjahr where d.NoteJetzt == wl.NoteJetzt select d).Any())
+                                {
+                                    schueler.DefizitäreLeistungen.Add(wl);
+                                }
+                            }                            
                         }
 
                         // ... oder aus Atlantis 
@@ -144,11 +150,14 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                                             where t.SchlüsselExtern == schueler.IdAtlantis
                                             select t).ToList())
                         {
-                            if (!(from s in schueler.DefizitäreLeistungen where s.Fach == al.Fach select s).Any())
+                            if (!(from d in schueler.DefizitäreLeistungen where d.Fach == al.Fach where d.NoteHalbjahr == al.NoteHalbjahr where d.NoteJetzt == al.NoteJetzt select d).Any())
                             {
                                 al.NoteJetzt = 4;
                                 al.NeueDefizitLeistung = al.NoteHalbjahr <= 4 && al.NoteJetzt >= 5 ? true : false;
-                                schueler.DefizitäreLeistungen.Add(al);
+                                if (!(from d in schueler.DefizitäreLeistungen where d.Fach == al.Fach select d).Any())
+                                {
+                                    schueler.DefizitäreLeistungen.Add(al);
+                                }
                             }
                         }
 

@@ -109,7 +109,53 @@ namespace webuntis2BlaueBriefe
             }
         }
 
-        private int GesamtPunkte2Gesamtnote(string gesamtpunkte)
+        internal List<string> GetInteressierendeKlassen()
+        {
+            var vorbelegung = Global.List2String((from t in this select t.Klasse).Distinct().ToList(), ',');
+
+            var interessierendeKlassen = new List<string>();
+
+            try
+            {
+                do
+                {
+                    Console.Write("  Bitte eine Klasse wählen " + (vorbelegung == null ? "" : "(" + vorbelegung + ")") + " : ");
+
+                    var x = Console.ReadLine();
+
+                    List<string> xx = x.ToUpper().Replace(" ", "").Split(',').ToList();
+
+                    if (vorbelegung != null)
+                    {
+                        xx.Add(vorbelegung);
+                    }
+
+                    foreach (var eingabe in xx)
+                    {
+                        foreach (var item in this)
+                        {
+                            if (item.Klasse != "" && (item.Klasse == eingabe || item.Klasse.StartsWith(eingabe)))
+                            {
+                                if (!interessierendeKlassen.Contains(item.Klasse))
+                                {
+                                    interessierendeKlassen.Add(item.Klasse);
+                                }
+                            }
+                        }
+                    }
+                } while (interessierendeKlassen.Count == 0);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Bei der Auswahl der interessierenden Klasse ist es zum Fehler gekommen. \n " + ex);
+            }
+            Console.WriteLine("   Ihre Auswahl: " + Global.List2String(interessierendeKlassen, ','));
+            Console.WriteLine(" ");
+
+            return interessierendeKlassen;
+        }
+
+            private int GesamtPunkte2Gesamtnote(string gesamtpunkte)
         {
             if (gesamtpunkte == "0.0")
             {
@@ -212,14 +258,20 @@ namespace webuntis2BlaueBriefe
                         i++;
                     }
 
-                    Console.Write(" Bitte Zahl (0 = keine Zuordnung) 1 bis " + this.Count + " eingeben: ");
+                    Console.Write(" Bitte Zahl (0 = keine Zuordnung) 1 bis " + (from t in this
+                                                                                where t.SchlüsselExtern == webuntisLeistung.SchlüsselExtern
+                                                                                where t.Klasse == webuntisLeistung.Klasse
+                                                                                select t).Count() + " eingeben: ");
 
                     try
                     {
                         eingabe = Console.ReadLine();
                         index = int.Parse(eingabe);
 
-                        if (index >= 0 && index <= this.Count)
+                        if (index >= 0 && index <= (from t in this
+                                                    where t.SchlüsselExtern == webuntisLeistung.SchlüsselExtern
+                                                    where t.Klasse == webuntisLeistung.Klasse
+                                                    select t).Count())
                         {
                             wiederholen = false;
                         }
@@ -235,10 +287,21 @@ namespace webuntis2BlaueBriefe
                 }
                 else
                 {
-                    Console.WriteLine("Ihre Auswahl: " + webuntisLeistung.Fach + " wird " + this[index - 1].Fach + " zugeordnet.");
-                    this[index - 1].Fach = webuntisLeistung.Fach;
-                    return this[index - 1];
+                    Console.WriteLine("Ihre Auswahl: " + webuntisLeistung.Fach + " wird " + (from t in this
+                                                                                             where t.SchlüsselExtern == webuntisLeistung.SchlüsselExtern
+                                                                                             where t.Klasse == webuntisLeistung.Klasse
+                                                                                             select t).ToList()[index - 1].Fach + " zugeordnet.");
+                    (from t in this
+                     where t.SchlüsselExtern == webuntisLeistung.SchlüsselExtern
+                     where t.Klasse == webuntisLeistung.Klasse
+                     select t).ToList()[index - 1].Fach = webuntisLeistung.Fach;
+                    
+                    return (from t in this
+                            where t.SchlüsselExtern == webuntisLeistung.SchlüsselExtern
+                            where t.Klasse == webuntisLeistung.Klasse
+                            select t).ToList()[index - 1];
                 }
+                return null;
             }
 
             return x[0];

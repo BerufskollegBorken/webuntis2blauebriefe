@@ -11,27 +11,36 @@ namespace webuntis2BlaueBriefe
     {
         public static string User = System.Security.Principal.WindowsIdentity.GetCurrent().Name.ToUpper().Split('\\')[1];
         public static string Folder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\BlaueBriefe-" + DateTime.Now.ToString("yyyyMMdd-hhmm");
-
+        
         static void Main(string[] args)
         {
+            System.IO.Directory.CreateDirectory(Folder);
             string steuerdatei = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), DateTime.Now.ToString("yyMMdd-HHmmss") + "_webuntisnoten2atlantis_" + System.Security.Principal.WindowsIdentity.GetCurrent().Name.ToUpper().Split('\\')[1] + ".csv");
 
             try
             {
-                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2023 | Version 20230310");
+                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2023 | Version 20230320");
                 Console.WriteLine("====================================================================================================");
                 Console.WriteLine("");
 
                 string sourceMarksPerLesson = CheckFile(User, "MarksPerLesson");
 
                 Periodes periodes = new Periodes();
-                Leistungen defizitäreWebuntisLeistungen = new Leistungen(sourceMarksPerLesson);
+                Leistungen alleDefizitäreWebuntisLeistungen = new Leistungen(sourceMarksPerLesson);
+
+                var xxx = alleDefizitäreWebuntisLeistungen.GetInteressierendeKlassen();
+
+                var defizitäreWebuntisLeistungen = new Leistungen();
+                defizitäreWebuntisLeistungen.AddRange((from t in alleDefizitäreWebuntisLeistungen where xxx.Contains(t.Klasse) select t).ToList());
+
                 Lehrers lehrers = new Lehrers(periodes);
                 Klasses klasses = new Klasses(lehrers, periodes, defizitäreWebuntisLeistungen);
                 
                 Leistungen atlantisLeistungen = new Leistungen(Global.ConnectionStringAtlantis, defizitäreWebuntisLeistungen);
                 
                 Schuelers schuelerMitDefiziten = new Schuelers(defizitäreWebuntisLeistungen, atlantisLeistungen, klasses, lehrers);
+
+                
 
                 foreach (var sd in schuelerMitDefiziten)
                 {
@@ -45,24 +54,25 @@ namespace webuntis2BlaueBriefe
                     var imHalbjahrKeinDefizit = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr >=5 select s.NoteHalbjahr).Any() ? false : true;
                     var verschlechterungvon5auf6 = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr == 5 where s.NoteJetzt == 6 select s.NoteHalbjahr).Any() ? true : false;
 
-                    Console.Write(sd.Nachname + "," + sd.Vorname + "," + (sd.Volljaehrig ? " Vollj. " : " Mindj. ") + " (" + sd.Klasse + "):");
+                    Console.WriteLine(sd.Klasse.PadRight(6) + sd.Nachname + "," + sd.Vorname + " ...");
+                    Global.Write(Folder,sd.Nachname + "," + sd.Vorname + "," + (sd.Volljaehrig ? " Vollj. " : " Mindj. ") + " (" + sd.Klasse + "):");
 
                     if (!nochWeitereDefiziteHinzugekommen && !verschlechterungvon5auf6)
                     {
-                        Console.WriteLine("keine weiteren Defizite seit dem Halbjahr, keine Mitteilung.");
+                        Global.WriteLine(Folder, "keine weiteren Defizite seit dem Halbjahr, keine Mitteilung.");
                     }
 
                     // HZ: kein Defizit; 
                     
                     if (imHalbjahrKeinDefizit && nochWeitereDefiziteHinzugekommen)
                     {
-                        Console.Write("imHalbjahrKeinDefizit,");
+                        Global.Write(Folder,"imHalbjahrKeinDefizit,");
                         
                         //jetzt eine 5: Mitteilung über Leistungsstand
 
                         if ((from s in sd.DefizitäreLeistungen where s.NeueDefizitLeistung select s.NoteJetzt).Sum() == 5)
                         {
-                            Console.Write("jetzt eine 5,");                                                        
+                            Global.Write(Folder,"jetzt eine 5,");                                                        
                             sd.RenderMitteilung("M", Folder);
                         }
 
@@ -71,7 +81,7 @@ namespace webuntis2BlaueBriefe
 
                         if ((from s in sd.DefizitäreLeistungen where s.NeueDefizitLeistung select s.NoteJetzt).Sum() >= 6)
                         {
-                            Console.Write("jetzt zwei oder mehr 5 oder eine 6,");
+                            Global.Write(Folder,"jetzt zwei oder mehr 5 oder eine 6,");
                             sd.RenderMitteilung("G", Folder);
                         }
                     }
@@ -81,7 +91,7 @@ namespace webuntis2BlaueBriefe
 
                     if (bereitsImHalbjahrEine5 && nochWeitereDefiziteHinzugekommen)
                     {
-                        Console.Write("bereits im Halbjahr eine 5; jetzt eine o. mehrere zusätzliche 5en o. 6en;");
+                        Global.Write(Folder,"bereits im Halbjahr eine 5; jetzt eine o. mehrere zusätzliche 5en o. 6en;");
                         sd.RenderMitteilung("G", Folder);
                     }
 
@@ -89,7 +99,7 @@ namespace webuntis2BlaueBriefe
 
                     if (bereitsImHalbjahrEine5 && verschlechterungvon5auf6 && !nochWeitereDefiziteHinzugekommen)
                     {
-                        Console.Write("im Hj genau eine 5, also bisher nicht gefährdet; jetzt 6;");
+                        Global.Write(Folder,"im Hj genau eine 5, also bisher nicht gefährdet; jetzt 6;");
                         sd.RenderMitteilung("V", Folder);
                     }
 
@@ -97,9 +107,16 @@ namespace webuntis2BlaueBriefe
 
                     if (bereitsImHalbjahrGefährdet && nochWeitereDefiziteHinzugekommen)
                     {
-                        Console.Write("bereits im Halbjahr gefährdet; jetzt eine o. mehrere zusätzliche 5en o. 6en;");
+                        Global.Write(Folder,"bereits im Halbjahr gefährdet; jetzt eine o. mehrere zusätzliche 5en o. 6en;");
                         sd.RenderMitteilung("G", Folder);
-                    } 
+                    }
+
+                    // Zeilen für alle gefährdeten Fächer andrucken
+
+                    foreach (var item in (from d in sd.DefizitäreLeistungen select d))
+                    {
+                        Global.WriteLine(Folder,item.Name.PadRight(20) + item.Fach.PadRight(5) + item.NoteHalbjahr.ToString() + " => " + item.NoteJetzt);
+                    }
                 }
 
                 Console.WriteLine("");

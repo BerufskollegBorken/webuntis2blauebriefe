@@ -43,5 +43,25 @@ namespace webuntis2BlaueBriefe
                 return reader.GetString(colIndex);
             return string.Empty;
         }
+
+        internal static string List2String(List<string> interessierendeKlassen, char delimiter)
+        {
+            var s = "";
+            foreach (var item in interessierendeKlassen)
+            {
+                s += item + delimiter;
+            }
+            return s.TrimEnd(delimiter);
+        }
+
+        internal static void Write(string folder, string v)
+        {
+            File.AppendAllText(folder + "\\Protokoll.txt", v);            
+        }
+
+        internal static void WriteLine(string folder, string v)
+        {
+            File.AppendAllText(folder + "\\Protokoll.txt", Environment.NewLine + v);
+        }
     }
 }
