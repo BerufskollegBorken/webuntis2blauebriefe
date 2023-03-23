@@ -61,7 +61,7 @@ namespace webuntis2BlaueBriefe
 
         internal static void WriteLine(string folder, string v)
         {
-            File.AppendAllText(folder + "\\Protokoll.txt", Environment.NewLine + v);
+            File.AppendAllText(folder + "\\Protokoll.txt", v + Environment.NewLine);
         }
     }
 }

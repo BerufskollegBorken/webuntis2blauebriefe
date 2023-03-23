@@ -133,11 +133,11 @@ namespace webuntis2BlaueBriefe
             }
             if (art == "M")
             {
-                Global.Write(folder, " => Mitteilung über den Leistungsstand");
+                Global.WriteLine(folder, " => Mitteilung über den Leistungsstand");
             }
             else
             {
-                Global.Write(folder, "  => Gefährdung");
+                Global.WriteLine(folder, "  => Gefährdung");
 
             }
         }
@@ -177,11 +177,11 @@ namespace webuntis2BlaueBriefe
         {
             if (art == "M")
             {
-                return "abweichend von " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "den" : "der") + " im letzten Zeugnis erteilten Note" + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "n" : "") + " nicht mehr " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "ausreichen" : "ausreicht") + ". Stellt sich eine weitere nicht ausreichende Leistung ein, ist die Versetzung gefährdet.";
+                return "abweichend von " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung || f.NochmaligeVerschlechterungAuf6 select f).Count() > 1 ? "den" : "der") + " im letzten Zeugnis erteilten Note" + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung || f.NochmaligeVerschlechterungAuf6 select f).Count() > 1 ? "n" : "") + " verschlechtert hat. Stellt sich eine weitere nicht ausreichende Leistung ein, ist die Versetzung gefährdet.";
             }
             if (art == "G")
             {
-                return "abweichend von " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "den" : "der") + " im letzten Zeugnis erteilten Note" + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "n" : "") + " nicht mehr " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "ausreichen" : "ausreicht") + ".";
+                return "abweichend von " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung || f.NochmaligeVerschlechterungAuf6 select f).Count() > 1 ? "den" : "der") + " im letzten Zeugnis erteilten Note" + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung || f.NochmaligeVerschlechterungAuf6 select f).Count() > 1 ? "n" : "") + " verschlechtert " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung || f.NochmaligeVerschlechterungAuf6 select f).Count() > 1 ? "haben" : "hat") + ".";
             }
             else
             {
@@ -195,16 +195,16 @@ namespace webuntis2BlaueBriefe
             {
                 if (Geschlecht.ToLower() == "m")
                 {
-                    return "Sie werden darüber unterrichtet, dass die Leistung" + ((from d in DefizitäreLeistungen where d.NeueDefizitLeistung select d).Count() > 1 ? "en" : "") + " Ihres Sohnes " + Vorname + ", Klasse " + Klasse + ", in " + ((from d in DefizitäreLeistungen where d.NeueDefizitLeistung select d).Count() > 1 ? "den Fächern" : "dem Fach");
+                    return "Sie werden darüber unterrichtet, dass sich die Leistung" + ((from d in DefizitäreLeistungen where d.NeueDefizitLeistung || d.NochmaligeVerschlechterungAuf6 select d).Count() > 1 ? "en" : "") + " Ihres Sohnes " + Vorname + ", Klasse " + Klasse + ", in " + ((from d in DefizitäreLeistungen where d.NeueDefizitLeistung || d.NochmaligeVerschlechterungAuf6 select d).Count() > 1 ? "den Fächern" : "dem Fach");
                 }
                 else
                 {
-                    return "Sie werden darüber unterrichtet, dass die Leistung" + ((from d in DefizitäreLeistungen where d.NeueDefizitLeistung select d).Count() > 1 ? "en" : "") + " Ihrer Tochter " + Vorname + ", Klasse " + Klasse + ", in " + ((from d in DefizitäreLeistungen where d.NeueDefizitLeistung select d).Count() > 1 ? "den Fächern" : "dem Fach");
+                    return "Sie werden darüber unterrichtet, dass sich die Leistung" + ((from d in DefizitäreLeistungen where d.NeueDefizitLeistung || d.NochmaligeVerschlechterungAuf6 select d).Count() > 1 ? "en" : "") + " Ihrer Tochter " + Vorname + ", Klasse " + Klasse + ", in " + ((from d in DefizitäreLeistungen where d.NeueDefizitLeistung || d.NochmaligeVerschlechterungAuf6 select d).Count() > 1 ? "den Fächern" : "dem Fach");
                 }
             }
             else
             {
-                return "Sie werden darüber unterrichtet, dass Ihre Leistung" + ((from d in DefizitäreLeistungen where d.NeueDefizitLeistung select d).Count() > 1 ? "en" : "") + " in " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung select f).Count() > 1 ? "den Fächern" : "dem Fach");
+                return "Sie werden darüber unterrichtet, dass sich Ihre Leistung" + ((from d in DefizitäreLeistungen where d.NeueDefizitLeistung || d.NochmaligeVerschlechterungAuf6 select d).Count() > 1 ? "en" : "") + " in " + ((from f in DefizitäreLeistungen where f.NeueDefizitLeistung || f.NochmaligeVerschlechterungAuf6 select f).Count() > 1 ? "den Fächern" : "dem Fach");
             }
         }
 
@@ -279,7 +279,7 @@ Leistung";
             }
             else
             {
-                foreach (var dl in (from d in DefizitäreLeistungen where d.NeueDefizitLeistung select d).ToList())
+                foreach (var dl in (from d in DefizitäreLeistungen where d.NeueDefizitLeistung || d.NochmaligeVerschlechterungAuf6 select d).ToList())
                 {
                     x += " " + dl.BezeichnungImZeugnis + " (" + NoteKlartext(dl.NoteJetzt) + ")\r\n";
                 }

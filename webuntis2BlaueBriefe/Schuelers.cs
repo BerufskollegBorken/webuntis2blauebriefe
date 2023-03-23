@@ -136,6 +136,7 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                                 wl.NoteHalbjahr = al.NoteHalbjahr;
                                 wl.BezeichnungImZeugnis = al.BezeichnungImZeugnis;
                                 wl.NeueDefizitLeistung = wl.NoteHalbjahr <= 4 && wl.NoteJetzt >= 5 ? true : false;
+                                wl.NochmaligeVerschlechterungAuf6 = wl.NoteHalbjahr == 5 && wl.NoteJetzt == 6 ? true : false;
                                 if (!(from d in schueler.DefizitäreLeistungen where d.Fach == al.Fach where d.NoteHalbjahr == wl.NoteHalbjahr where d.NoteJetzt == wl.NoteJetzt select d).Any())
                                 {
                                     schueler.DefizitäreLeistungen.Add(wl);
@@ -154,6 +155,7 @@ WHERE vorgang_schuljahr = '" + Global.AktSjAtlantis + @"' AND schue_sj.pu_id = "
                             {
                                 al.NoteJetzt = 4;
                                 al.NeueDefizitLeistung = al.NoteHalbjahr <= 4 && al.NoteJetzt >= 5 ? true : false;
+                                al.NochmaligeVerschlechterungAuf6 = al.NoteHalbjahr == 5 && al.NoteJetzt == 6 ? true : false;
                                 if (!(from d in schueler.DefizitäreLeistungen where d.Fach == al.Fach select d).Any())
                                 {
                                     schueler.DefizitäreLeistungen.Add(al);

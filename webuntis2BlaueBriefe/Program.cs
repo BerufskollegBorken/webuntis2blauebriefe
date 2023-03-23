@@ -55,11 +55,11 @@ namespace webuntis2BlaueBriefe
                     var verschlechterungvon5auf6 = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr == 5 where s.NoteJetzt == 6 select s.NoteHalbjahr).Any() ? true : false;
 
                     Console.WriteLine(sd.Klasse.PadRight(6) + sd.Nachname + "," + sd.Vorname + " ...");
-                    Global.Write(Folder,sd.Nachname + "," + sd.Vorname + "," + (sd.Volljaehrig ? " Vollj. " : " Mindj. ") + " (" + sd.Klasse + "):");
+                    Global.WriteLine(Folder,sd.Nachname + "," + sd.Vorname + ": " + (sd.Volljaehrig ? "Volljährig" : " Minderjährig") + ", " + sd.Klasse);
 
                     if (!nochWeitereDefiziteHinzugekommen && !verschlechterungvon5auf6)
                     {
-                        Global.WriteLine(Folder, "keine weiteren Defizite seit dem Halbjahr, keine Mitteilung.");
+                        Global.WriteLine(Folder, sd.Nachname + "," + sd.Vorname + ": keine weiteren Defizite seit dem Halbjahr, keine Mitteilung.");
                     }
 
                     // HZ: kein Defizit; 
@@ -107,7 +107,7 @@ namespace webuntis2BlaueBriefe
 
                     if (bereitsImHalbjahrGefährdet && nochWeitereDefiziteHinzugekommen)
                     {
-                        Global.Write(Folder,"bereits im Halbjahr gefährdet; jetzt eine o. mehrere zusätzliche 5en o. 6en;");
+                        Global.Write(Folder, sd.Nachname + "," + sd.Vorname + ": " + "bereits im Halbjahr gefährdet; jetzt eine o. mehrere zusätzliche 5en o. 6en;");
                         sd.RenderMitteilung("G", Folder);
                     }
 
@@ -115,15 +115,16 @@ namespace webuntis2BlaueBriefe
 
                     foreach (var item in (from d in sd.DefizitäreLeistungen select d))
                     {
-                        Global.WriteLine(Folder,item.Name.PadRight(20) + item.Fach.PadRight(5) + item.NoteHalbjahr.ToString() + " => " + item.NoteJetzt);
+                        Global.WriteLine(Folder, sd.Nachname + "," + sd.Vorname + ": " + item.Fach.PadRight(5) + item.NoteHalbjahr.ToString() + " => " + item.NoteJetzt);
                     }
+                    Global.WriteLine(Folder, "");
                 }
 
                 Console.WriteLine("");
                 Console.WriteLine("Verarbeitung beendet. ENTER");
-                
-                Console.ReadKey();
                 Process.Start(Folder);
+                Console.ReadKey();
+                
             }
             catch(IOException ex)
             {
